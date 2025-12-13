@@ -2,20 +2,52 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Omega Institute (Front-end Demo)
+# Omega Institute (DB-backed App, WIP)
 
-A high-fidelity, futuristic DeSci publishing platform UI built with Next.js (App Router) + TypeScript + Tailwind + shadcn/ui.
+A high-fidelity DeSci publishing + review platform built with Next.js (App Router) + TypeScript + Tailwind + shadcn/ui.
 
-- No backend
-- No real wallet integration
-- Mock data only (`lib/mockData.ts`)
+- Not zero-backend: production target is **server-side persistence backed by a real database**
+- Current prototype remains mock-friendly: `localStorage`, local disk `.omega/`, and fallback mock data (`lib/mockData.ts`)
+- No real wallet integration (yet)
 
-## Academic Positioning Plan / 学术定位总纲
+## Omega Institute 平台学术定位 Plan / Academic Positioning Plan
 
-### One-liner / 一句话定位
+### 0. 一句话定位 / 0. One-liner
+
+**中文：** Omega Institute 是一个面向理论型研究与计算型基础研究的开放档案与开放评审平台。我们不根据作者是人类还是 AI 来判断价值。我们只根据可证伪的主张、可追溯的推导、可复核的证据链、公开的评审与纠错记录来累积可信度等级。
+
+**EN:** Omega Institute is an open archive and open review platform for theoretical research and computational foundational research. We do not judge value by whether the author is human or AI. We judge by falsifiable claims, traceable derivations, reviewable evidence chains, and a public record of review and corrections that accumulates trust levels.
+
+### For header/investors / 用于页眉/投资人（短句）
 
 - **EN:** **Omega Institute turns conclusion–evidence alignment into academia’s currency.** Not a faster submit button—an auditable, reproducible, composable structured review protocol.
 - **中文：** **Omega Institute：让“结论—证据对齐”成为学术的通用货币。** 不是更快的投稿按钮，而是**可审计、可复现、可组合**的结构化评审协议。
+
+### 1. 先讲动机。为什么 Omega 必须长得和传统期刊不一样 / 1. Motivation: why Omega must look different
+
+**中文：** 不做学术的人最容易困惑的是：为什么不能像论坛一样自由发。为什么还要填一堆字段。为什么还要审核评论。为什么要记录 AI 工具。
+
+我们用四个最简单的动机解释你们的制度设计。
+
+**EN:** The most confusing part for non-academics is: why can’t we post freely like a forum? Why do we need to fill in so many fields? Why do comments need moderation? Why do we record AI tooling?
+
+We explain our institutional design with four simple motivations.
+
+#### 1.1 动机一。我们要解决的不是内容不够。是信任不够 / Motivation 1: The problem isn’t content scarcity—it’s trust scarcity
+
+**中文：** 互联网上从来不缺理论。缺的是让别人相信你不是在自说自话的机制。传统期刊用的是名校名人和编辑部信任链。你们要做的是把信任链从人转移到证据和过程。
+
+**EN:** The internet has never lacked theories. What it lacks is a mechanism that convinces others you’re not just talking to yourself. Traditional journals rely on trust chains built on elite institutions, famous names, and editorial boards. Omega moves the trust chain from people to evidence and process.
+
+**对应平台策略 / Platform strategy:** 把每篇研究记录变成一个可审计对象。它有主张清单。有假设清单。有可证伪路径。有版本记录。有评审与反驳记录。有纠错与撤稿机制。这样读者不用先相信作者身份，只要看证据链。
+
+**EN:** Turn each research record into an auditable object: a claim list, an assumption list, a falsifiability path, version history, review + rebuttal history, and correction/retraction mechanisms. Readers don’t have to trust identities first—they can follow the evidence chain.
+
+#### 1.2 动机二。我们要让高方差探索与学术可信同时成立 / Motivation 2: Make high-variance exploration and academic credibility coexist
+
+**中文：** 高方差探索的意思是：允许大胆假设。允许与主流不同。允许在早期很不成熟。传统期刊往往不喜欢高方差。你们要吸引的就是被这个系统排斥的人。
+
+**EN:** High-variance exploration means allowing bold hypotheses, allowing deviations from the mainstream, and allowing work to be immature in its early stages. Traditional journals tend to dislike high-variance work. Omega should attract precisely the people filtered out by that system.
 
 ### What problem this solves / 这解决了什么问题
 
@@ -52,7 +84,7 @@ Omega 不要求评审写长文，而是要求输出**结构化、可验证**的�
 - **Extensible / 可扩展：** rubric dimensions and tests are a protocol that different fields can extend.
 - **Incentive-aligned / 激励对齐：** rewards go to validators who pass random audit (simulated in this demo).
 
-### Zero-backend discovery / 零后端探索
+### Client-side discovery (map) / 客户端探索
 
 - **EN:** The `/map` page renders a keyword co-occurrence graph (papers ↔ keywords) fully in the browser for fast exploration.
 - **中文：** `/map` 提供纯前端的关键词共现图（论文↔关键词），让论文库秒变可漫游的探索地图。
@@ -120,7 +152,7 @@ It supports:
 - One-click **AI initial triage** (epistemic rubric + steelman attacks)
 - 72h **defense window** countdown (client-side)
 
-Evidence pointers are persisted to localStorage under `omega_evidence_v1:<paperId>` so the archive drawer can reuse them for rubric runs.
+Evidence pointers are currently persisted to localStorage under `omega_evidence_v1:<paperId>` so the archive drawer can reuse them for rubric runs (demo-only; will move to DB-backed storage).
 
 ## Community verification (work orders)
 
@@ -137,7 +169,7 @@ Each paper includes a `Verify` tab (and `/submit` includes a `Community` tab) th
   - `REJECT` burns the submitter stake, applies a reputation penalty, and reopens the ticket
 - Submit `FAIL`: rollback (ticket returns to OPEN) + stake burned + reputation decrease
 
-State is client-side only (localStorage):
+State is currently client-side only (localStorage) in this prototype:
 
 - Validator profiles store: `omega_validator_profiles_v1` (migrates legacy `omega_validator_profile_v1`)
 - Per-paper work orders + ledger: `omega_work_orders_v1:<paperId>`
@@ -157,7 +189,7 @@ It snapshots a versioned “final conclusion” that includes:
 - Model card + data card
 - 0–5 rubric scores with auto-test stubs
 
-Conclusion versions are stored in localStorage under `omega_conclusion_v1:<paperId>`.
+Conclusion versions are currently stored in localStorage under `omega_conclusion_v1:<paperId>` (demo-only; will move to DB-backed storage).
 
 The conclusion page also provides export buttons:
 
@@ -172,7 +204,7 @@ The conclusion page also includes an `Incentives` panel (mock, local-only):
 
 ## Backend protocol (JSON Schema + artifacts + queue)
 
-This demo now includes a minimal backend surface (still mock-friendly) to match a production-style architecture:
+This repo includes a backend surface (Next.js Route Handlers). Persistence is still mock-friendly today, but the target is DB-backed storage:
 
 - **Review protocol**: JSON Schema with `claims[]`, `evidence[]`, `tests[]`
   - Schema: `GET /api/review/protocol/schema`
@@ -193,7 +225,7 @@ This demo now includes a minimal backend surface (still mock-friendly) to match 
   - Submit PASS/FAIL: `POST /api/market/bounties/submit`
   - Audit claim: `POST /api/market/bounties/audit/claim`
   - Audit confirm/reject: `POST /api/market/bounties/audit/submit`
-- **Keyword co-occurrence map (zero DB)**: explore the paper library as a navigable graph
+- **Keyword co-occurrence map (client-side)**: explore the paper library as a navigable graph (DB can be added as a data source)
   - UI: `GET /map`
   - Paper cards: keyword badges deep-link into the map (`/map?keyword=<kw>`)
 - **Task queue (demo)**: reproduction tickets are enqueued (simulated by default)

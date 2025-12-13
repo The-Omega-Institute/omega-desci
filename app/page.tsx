@@ -253,9 +253,41 @@ function ArchiveContent() {
               <div className="text-[10px] font-mono text-zinc-600">ACADEMIC_POSITIONING_PLAN • PRD_CONTEXT</div>
               <h2 className="text-2xl md:text-3xl font-serif text-zinc-100">Omega Protocol / Omega 协议</h2>
               <p className="text-sm text-zinc-500">
-                A structured epistemic review loop that turns critique into reusable, auditable data—not one-off opinions.
+                Omega Institute is an open archive and open review platform for theoretical research and computational foundational research. We do not judge value
+                by whether the author is human or AI. We judge by falsifiable claims, traceable derivations, reviewable evidence chains, and a public record of
+                review and corrections that accumulates trust levels.
               </p>
-              <p className="text-sm text-zinc-500">把评审从“观点文章”升级成可复用、可审计的数据协议：结论与证据逐条对齐。</p>
+              <p className="text-sm text-zinc-500">
+                Omega Institute 是一个面向理论型研究与计算型基础研究的开放档案与开放评审平台。我们不根据作者是人类还是 AI 来判断价值。我们只根据可证伪的主张、可追溯的推导、可复核的证据链、公开的评审与纠错记录来累积可信度等级。
+              </p>
+            </div>
+
+            <div className="border border-zinc-800 bg-black/20 p-5 space-y-4">
+              <div className="text-xs font-mono text-emerald-500">MOTIVATION / 动机</div>
+
+              <div className="space-y-2">
+                <div className="text-sm text-zinc-400">Motivation 1: the problem isn’t content scarcity—it’s trust scarcity.</div>
+                <div className="text-sm text-zinc-500">动机一：我们要解决的不是内容不够，是信任不够。</div>
+                <div className="text-sm text-zinc-400">
+                  The internet has never lacked theories. What it lacks is a mechanism that convinces others you’re not just talking to yourself. Omega moves the
+                  trust chain from people to evidence and process.
+                </div>
+                <div className="text-sm text-zinc-500">互联网上从来不缺理论。缺的是让别人相信你不是在自说自话的机制。Omega 要做的是把信任链从人转移到证据和过程。</div>
+              </div>
+
+              <Separator className="bg-zinc-800" />
+
+              <div className="space-y-2">
+                <div className="text-sm text-zinc-400">Motivation 2: make high-variance exploration and academic credibility coexist.</div>
+                <div className="text-sm text-zinc-500">动机二：我们要让高方差探索与学术可信同时成立。</div>
+                <div className="text-sm text-zinc-400">
+                  High-variance exploration means allowing bold hypotheses, allowing deviations from the mainstream, and allowing work to be immature in its early
+                  stages. Traditional journals tend to dislike high-variance work. Omega should attract precisely the people filtered out by that system.
+                </div>
+                <div className="text-sm text-zinc-500">
+                  高方差探索的意思是：允许大胆假设。允许与主流不同。允许在早期很不成熟。传统期刊往往不喜欢高方差。你们要吸引的就是被这个系统排斥的人。
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
