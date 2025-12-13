@@ -1,14 +1,23 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Paper } from "@/lib/mockData";
 import { getStats, papers as mockPapers } from "@/lib/mockData";
+import {
+  DEFAULT_ARCHIVE_FILTERS,
+  filterPapers,
+  getHasActiveFilters,
+  SORT_OPTIONS,
+  sortPapers,
+  type ArchiveFilters,
+  type SortKey,
+} from "@/lib/archive/filters";
 import { FilterSidebar } from "@/components/archive/FilterSidebar";
 import { PaperCard } from "@/components/archive/PaperCard";
 import { PaperDrawer } from "@/components/archive/PaperDrawer";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Separator, Sheet } from "@/components/ui/shadcn";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, ScrollArea, Separator, Sheet, SheetContent } from "@/components/ui/shadcn";
 import { ChevronDown, ExternalLink, Filter, Gavel, Network, Sparkles, X } from "lucide-react";
 
 type ZenodoRecordsResponse = {
@@ -90,6 +99,14 @@ function ArchiveContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedPaperOverride, setSelectedPaperOverride] = useState<Paper | null>(null);
+  const [filters, setFilters] = useState<ArchiveFilters>(DEFAULT_ARCHIVE_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const clearFilters = () => setFilters(DEFAULT_ARCHIVE_FILTERS);
+  const hasActiveFilters = useMemo(() => getHasActiveFilters(filters), [filters]);
 
   const stats = useMemo(() => {
     const base = getStats();
@@ -101,6 +118,11 @@ function ArchiveContent() {
       totalELF: totalELF || base.totalELF,
     };
   }, [papers, total]);
+
+  const visiblePapers = useMemo(() => {
+    const filtered = filterPapers(papers, filters);
+    return sortPapers(filtered, sortKey);
+  }, [filters, papers, sortKey]);
 
   const hasMore = total !== null && papers.length < total;
 
@@ -141,6 +163,20 @@ function ArchiveContent() {
     void loadPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!sortOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (sortMenuRef.current?.contains(target)) return;
+      setSortOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [sortOpen]);
   
   const selectedPaperId = searchParams.get("paper");
   const selectedPaperFromList = papers.find((p) => p.id === selectedPaperId) || null;
@@ -282,12 +318,70 @@ function ArchiveContent() {
                 <div className="text-sm text-zinc-500">动机二：我们要让高方差探索与学术可信同时成立。</div>
                 <div className="text-sm text-zinc-400">
                   High-variance exploration means allowing bold hypotheses, allowing deviations from the mainstream, and allowing work to be immature in its early
-                  stages. Traditional journals tend to dislike high-variance work. Omega should attract precisely the people filtered out by that system.
+                  stages. Traditional journals tend to dislike high-variance work. Omega should attract precisely the people filtered out by that system. Without
+                  credibility stratification, high-variance exploration becomes noise; readers will experience it as mysticism.
                 </div>
                 <div className="text-sm text-zinc-500">
-                  高方差探索的意思是：允许大胆假设。允许与主流不同。允许在早期很不成熟。传统期刊往往不喜欢高方差。你们要吸引的就是被这个系统排斥的人。
+                  高方差探索的意思是：允许大胆假设。允许与主流不同。允许在早期很不成熟。传统期刊往往不喜欢高方差。你们要吸引的就是被这个系统排斥的人。但如果没有可信度分层，高方差就会变成噪音。读者会觉得全是玄学。
+                </div>
+                <div className="text-sm text-zinc-400">
+                  Platform strategy: use credibility levels to carry high variance. Level 0 may exist. Level 1 requires a complete structure. Level 2 requires open
+                  review. Level 3 requires independent replication or verification. Omega never promises Level 0 or Level 1 conclusions are correct—it only promises
+                  the record is complete and traceable.
+                </div>
+                <div className="text-sm text-zinc-500">
+                  对应平台策略是：用可信度等级来承载高方差。Level 0 允许存在。Level 1 要求结构完整。Level 2 需要公开评审。Level 3 需要独立复核或验证。平台从不承诺 Level 0 或 Level 1 的结论正确。平台只承诺记录完整可追溯。
                 </div>
               </div>
+
+              <Separator className="bg-zinc-800" />
+
+              <div className="space-y-2">
+                <div className="text-sm text-zinc-400">Motivation 3: we don’t judge humans or AI—but we must support accountability and re-audit.</div>
+                <div className="text-sm text-zinc-500">动机三：我们不 judge 人或 AI。但必须能追责和复核。</div>
+                <div className="text-sm text-zinc-400">
+                  “Not judging” means we don’t dismiss work because it was written with AI, and we don’t award points because the author is a famous professor from
+                  an elite institution.
+                </div>
+                <div className="text-sm text-zinc-500">不 judge 的意思是：不因为你是 AI 写的就否定。也不因为你是名校教授就加分。</div>
+                <div className="text-sm text-zinc-400">
+                  But an academic system needs two non-negotiable baselines: a responsible party and method provenance. Without them, errors cannot be corrected and
+                  disputes cannot converge.
+                </div>
+                <div className="text-sm text-zinc-500">但学术系统必须有两个底线：责任主体。方法来源。否则任何错误都没法纠正，任何争议都没法收敛。</div>
+                <div className="text-sm text-zinc-400">
+                  Platform strategy: Omega does not run an AI morality court. We do method and provenance disclosure. If a tool or automated workflow affects the
+                  derivation, code, data, conclusions, or figures, it is part of the methodology and must be recorded. The goal is re-audit, not labeling.
+                </div>
+                <div className="text-sm text-zinc-500">
+                  对应平台策略是：你们不做 AI 道德审判。你们做方法与来源披露。只要某种工具或自动化流程影响了推导、代码、数据、结论或图表，它就属于方法学的一部分，必须记录，目的是复核，不是贴标签。
+                </div>
+              </div>
+
+              <Separator className="bg-zinc-800" />
+
+              <div className="space-y-2">
+                <div className="text-sm text-zinc-400">Motivation 4: turn peer review from a black box into a reusable public asset.</div>
+                <div className="text-sm text-zinc-500">动机四：我们要把审稿从黑箱变成可复用的公共资产。</div>
+                <div className="text-sm text-zinc-400">
+                  Traditional peer review often suffers from: black-box processes, slowness, individual bias, review reports that cannot be cited, and reviewer
+                  contributions that are not counted as academic assets.
+                </div>
+                <div className="text-sm text-zinc-500">传统审稿常见问题是：黑箱。慢。个人偏见。审稿意见不能被引用。审稿人贡献不被计入学术资产。</div>
+                <div className="text-sm text-zinc-400">
+                  Platform strategy: open review, structured review, citable reviews, and reviews that earn reputation and rewards. A review is a publishable
+                  object—not a comment-section fight.
+                </div>
+                <div className="text-sm text-zinc-500">
+                  对应平台策略是：公开评审。结构化评审。评审可引用。评审可获得声望与奖励。评审也是一种出版对象，不是评论区吵架。
+                </div>
+              </div>
+            </div>
+
+            <div className="border border-zinc-800 bg-black/20 p-5 space-y-3">
+              <div className="text-xs font-mono text-emerald-500">NORTH STAR / 北极星原则</div>
+              <div className="text-sm text-zinc-400">2. North Star principles: all features must obey these five.</div>
+              <div className="text-sm text-zinc-500">2. 平台的北极星原则。所有功能都要服从这五条。</div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -330,11 +424,24 @@ function ArchiveContent() {
 
       {/* Main Layout */}
       <div className="container px-4 md:px-6 py-8">
+        {/* Mobile Filters */}
+        <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <SheetContent side="left" className="p-0 sm:max-w-sm w-full border-r border-zinc-800">
+            <div className="p-4 border-b border-zinc-800">
+              <div className="text-[10px] font-mono text-zinc-600">ARCHIVE_FILTERS</div>
+              <div className="text-sm text-zinc-400 mt-1">Refine the archive view</div>
+            </div>
+            <ScrollArea className="h-[calc(100vh-120px)] p-4">
+              <FilterSidebar value={filters} onChange={setFilters} onClear={clearFilters} className="pr-0" />
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
           {/* Sidebar (Desktop) */}
           <div className="hidden md:block md:col-span-3">
-             <FilterSidebar />
+             <FilterSidebar value={filters} onChange={setFilters} onClear={clearFilters} />
           </div>
 
           {/* Main Grid Area */}
@@ -342,31 +449,138 @@ function ArchiveContent() {
             
             {/* Mobile Filter Trigger & Sorting */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-               <Button variant="outline" className="md:hidden w-full border-zinc-700 border-dashed">
+               <Button
+                 type="button"
+                 variant="outline"
+                 className="md:hidden w-full border-zinc-700 border-dashed"
+                 onClick={() => setFiltersOpen(true)}
+               >
                   <Filter className="mr-2 h-4 w-4" /> Filters
                </Button>
                
                <div className="flex flex-wrap items-center gap-2">
-                 <Badge variant="emerald" className="cursor-pointer gap-1 pl-1">
-                    <X className="w-3 h-3 hover:text-white" /> Code: Available
-                 </Badge>
-                 <Badge variant="secondary" className="cursor-pointer gap-1 pl-1 bg-zinc-800 text-zinc-400">
-                    <X className="w-3 h-3 hover:text-white" /> Type: Preprint
-                 </Badge>
-                 <span className="text-xs text-zinc-500 ml-2 cursor-pointer hover:text-white underline decoration-dashed">Clear</span>
+                 {filters.requireCode ? (
+                   <Badge
+                     variant="emerald"
+                     className="cursor-pointer gap-1 pl-1"
+                     role="button"
+                     tabIndex={0}
+                     onClick={() => setFilters((prev) => ({ ...prev, requireCode: false }))}
+                   >
+                     <X className="w-3 h-3 hover:text-white" /> Code: Available
+                   </Badge>
+                 ) : null}
+                 {filters.requireData ? (
+                   <Badge
+                     variant="emerald"
+                     className="cursor-pointer gap-1 pl-1"
+                     role="button"
+                     tabIndex={0}
+                     onClick={() => setFilters((prev) => ({ ...prev, requireData: false }))}
+                   >
+                     <X className="w-3 h-3 hover:text-white" /> Data: Available
+                   </Badge>
+                 ) : null}
+                 {filters.articleTypes.map((t) => (
+                   <Badge
+                     key={`type:${t}`}
+                     variant="secondary"
+                     className="cursor-pointer gap-1 pl-1 bg-zinc-800 text-zinc-400"
+                     role="button"
+                     tabIndex={0}
+                     onClick={() =>
+                       setFilters((prev) => ({
+                         ...prev,
+                         articleTypes: prev.articleTypes.filter((x) => x !== t),
+                       }))
+                     }
+                   >
+                     <X className="w-3 h-3 hover:text-white" /> Type: {t}
+                   </Badge>
+                 ))}
+                 {filters.disciplines.map((d) => (
+                   <Badge
+                     key={`disc:${d}`}
+                     variant="outline"
+                     className="cursor-pointer gap-1 pl-1 border-zinc-700 text-zinc-400"
+                     role="button"
+                     tabIndex={0}
+                     onClick={() =>
+                       setFilters((prev) => ({
+                         ...prev,
+                         disciplines: prev.disciplines.filter((x) => x !== d),
+                       }))
+                     }
+                   >
+                     <X className="w-3 h-3 hover:text-white" /> {d}
+                   </Badge>
+                 ))}
+                 {filters.minLevel !== null ? (
+                   <Badge
+                     variant="outline"
+                     className="cursor-pointer gap-1 pl-1 border-zinc-700 text-zinc-400"
+                     role="button"
+                     tabIndex={0}
+                     onClick={() => setFilters((prev) => ({ ...prev, minLevel: null }))}
+                   >
+                     <X className="w-3 h-3 hover:text-white" /> Level ≥ {filters.minLevel}
+                   </Badge>
+                 ) : null}
+
+                 {!hasActiveFilters ? <span className="text-xs text-zinc-700 font-mono">No filters</span> : null}
+
+                 <span
+                   className={
+                     "text-xs ml-2 underline decoration-dashed " +
+                     (hasActiveFilters ? "text-zinc-500 cursor-pointer hover:text-white" : "text-zinc-800 cursor-not-allowed")
+                   }
+                   onClick={hasActiveFilters ? clearFilters : undefined}
+                 >
+                   Clear
+                 </span>
                </div>
 
-               <div className="flex items-center gap-2 ml-auto">
+               <div className="flex items-center gap-2 ml-auto relative" ref={sortMenuRef}>
                  <span className="text-xs text-zinc-500 font-mono">SORT BY:</span>
-                 <Button variant="ghost" size="sm" className="h-8 font-mono text-xs">
-                    NEWEST <ChevronDown className="ml-1 w-3 h-3" />
+                 <Button
+                   type="button"
+                   variant="ghost"
+                   size="sm"
+                   className="h-8 font-mono text-xs"
+                   onClick={() => setSortOpen((prev) => !prev)}
+                 >
+                   {SORT_OPTIONS.find((opt) => opt.key === sortKey)?.label ?? "NEWEST"} <ChevronDown className="ml-1 w-3 h-3" />
                  </Button>
+                 {sortOpen ? (
+                   <div className="absolute right-0 top-full mt-1 w-56 border border-zinc-800 bg-zinc-950 shadow-lg z-50">
+                     {SORT_OPTIONS.map((opt) => {
+                       const active = opt.key === sortKey;
+                       return (
+                         <button
+                           key={opt.key}
+                           type="button"
+                           className={
+                             "w-full text-left px-3 py-2 text-xs font-mono border-b border-zinc-800 last:border-b-0 " +
+                             (active ? "text-emerald-400 bg-emerald-500/10" : "text-zinc-300 hover:bg-zinc-900/60")
+                           }
+                           onClick={() => {
+                             setSortKey(opt.key);
+                             setSortOpen(false);
+                           }}
+                         >
+                           <div className="text-[11px]">{opt.label}</div>
+                           <div className="text-[10px] text-zinc-500 mt-0.5">{opt.description}</div>
+                         </button>
+                       );
+                     })}
+                   </div>
+                 ) : null}
                </div>
             </div>
 
             {/* Grid */}
             <div className="grid grid-cols-1 gap-6">
-               {papers.map((paper) => (
+               {visiblePapers.map((paper) => (
                  <PaperCard key={paper.id} paper={paper} onClick={handleCardClick} />
                ))}
             </div>

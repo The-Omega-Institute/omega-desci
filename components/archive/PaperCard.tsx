@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Paper } from "@/lib/mockData";
 import { Badge, Card, CardContent, CardFooter, CardHeader, Button } from "@/components/ui/shadcn";
@@ -11,6 +11,40 @@ interface PaperCardProps {
 }
 
 export function PaperCard({ paper, onClick }: PaperCardProps) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const t = window.setTimeout(() => setCopied(false), 1200);
+    return () => window.clearTimeout(t);
+  }, [copied]);
+
+  const copyHash = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!paper.codeHash) return;
+
+    try {
+      await navigator.clipboard.writeText(paper.codeHash);
+      setCopied(true);
+    } catch {
+      try {
+        const el = document.createElement("textarea");
+        el.value = paper.codeHash;
+        el.setAttribute("readonly", "true");
+        el.style.position = "fixed";
+        el.style.left = "-9999px";
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+        setCopied(true);
+      } catch {
+        setCopied(false);
+      }
+    }
+  };
+
   return (
     <Card 
       className="group flex flex-col justify-between hover:border-emerald-500/50 transition-colors cursor-pointer h-full"
@@ -106,9 +140,23 @@ export function PaperCard({ paper, onClick }: PaperCardProps) {
         {paper.codeHash && (
            <div className="w-full flex justify-between items-center text-xs font-mono text-zinc-600 group/hash">
              <span>Hash: {paper.codeHash}</span>
-             <Button variant="ghost" size="icon" className="h-4 w-4 text-zinc-700 opacity-0 group-hover/hash:opacity-100 hover:text-emerald-500">
-               <Copy className="h-3 w-3" />
-             </Button>
+             <TooltipProvider>
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <Button
+                     type="button"
+                     variant="ghost"
+                     size="icon"
+                     className="h-4 w-4 text-zinc-700 opacity-0 group-hover/hash:opacity-100 hover:text-emerald-500"
+                     onClick={copyHash}
+                     aria-label="Copy code hash"
+                   >
+                     <Copy className="h-3 w-3" />
+                   </Button>
+                 </TooltipTrigger>
+                 <TooltipContent>{copied ? "Copied" : "Copy hash"}</TooltipContent>
+               </Tooltip>
+             </TooltipProvider>
            </div>
         )}
       </CardFooter>

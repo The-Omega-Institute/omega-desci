@@ -1,15 +1,42 @@
 "use client";
 
 import Link from "next/link";
+import { Check } from "lucide-react";
+import type { Paper, VerificationLevel } from "@/lib/mockData";
+import { DEFAULT_ARCHIVE_FILTERS, type ArchiveFilters, toggleStringArrayValue } from "@/lib/archive/filters";
+import { cn } from "@/lib/utils";
 import { Badge, Button, Separator } from "@/components/ui/shadcn";
 
-export function FilterSidebar() {
-  const disciplines = [
-    "Digital Physics", "Cellular Automata", "Thermodynamics", "AI Foundations", "Cosmology"
-  ];
+const DISCIPLINES: Paper["discipline"][] = [
+  "Digital Physics",
+  "Cellular Automata",
+  "Thermodynamics",
+  "AI Foundations",
+  "Cosmology",
+];
+
+const ARTICLE_TYPES: Paper["articleType"][] = [
+  "Preprint",
+  "Methods Note",
+  "Replication Report",
+  "Survey",
+  "Negative Result",
+];
+
+const VERIFICATION_LEVELS: VerificationLevel[] = [0, 1, 2, 3];
+
+type FilterSidebarProps = {
+  value: ArchiveFilters;
+  onChange: (next: ArchiveFilters) => void;
+  onClear?: () => void;
+  className?: string;
+};
+
+export function FilterSidebar({ value, onChange, onClear, className }: FilterSidebarProps) {
+  const clear = onClear || (() => onChange(DEFAULT_ARCHIVE_FILTERS));
 
   return (
-    <aside className="space-y-8 pr-4">
+    <aside className={cn("space-y-8 pr-4", className)}>
       {/* Scope Summary */}
       <div className="space-y-4">
         <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-widest border-b border-zinc-800 pb-2">Scope Summary</h3>
@@ -17,7 +44,7 @@ export function FilterSidebar() {
           &ldquo;Omega publishes high-variance, falsifiable research. Claims must include assumptions and a test path.&rdquo;
         </p>
         <div className="flex flex-wrap gap-2">
-          {disciplines.map(d => (
+          {DISCIPLINES.map((d) => (
             <Badge key={d} variant="outline" className="text-[10px] border-zinc-700 text-zinc-500">
               {d}
             </Badge>
@@ -32,14 +59,66 @@ export function FilterSidebar() {
         <div>
           <h4 className="text-xs font-bold text-emerald-500 mb-3 uppercase">Discipline</h4>
           <div className="space-y-2">
-            {disciplines.slice(0, 4).map(d => (
-              <div key={d} className="flex items-center gap-2">
-                 <div className="w-4 h-4 border border-zinc-700 bg-zinc-900 flex items-center justify-center cursor-pointer hover:border-emerald-500">
-                    {/* Simulated checked state for demo */}
-                 </div>
-                 <span className="text-sm text-zinc-300 cursor-pointer hover:text-white">{d}</span>
-              </div>
-            ))}
+            {DISCIPLINES.map((d) => {
+              const checked = value.disciplines.includes(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  className="flex items-center gap-2 group text-left"
+                  onClick={() =>
+                    onChange({
+                      ...value,
+                      disciplines: toggleStringArrayValue(value.disciplines, d),
+                    })
+                  }
+                >
+                  <div
+                    className={cn(
+                      "w-4 h-4 border bg-zinc-900 flex items-center justify-center",
+                      checked ? "border-emerald-500 bg-emerald-950/30" : "border-zinc-700 group-hover:border-emerald-500"
+                    )}
+                    aria-hidden="true"
+                  >
+                    {checked ? <Check className="w-3 h-3 text-emerald-500" /> : null}
+                  </div>
+                  <span className={cn("text-sm cursor-pointer", checked ? "text-white" : "text-zinc-300 group-hover:text-white")}>{d}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-xs font-bold text-emerald-500 mb-3 uppercase">Article Type</h4>
+          <div className="space-y-2">
+            {ARTICLE_TYPES.map((t) => {
+              const checked = value.articleTypes.includes(t);
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  className="flex items-center gap-2 group text-left"
+                  onClick={() =>
+                    onChange({
+                      ...value,
+                      articleTypes: toggleStringArrayValue(value.articleTypes, t),
+                    })
+                  }
+                >
+                  <div
+                    className={cn(
+                      "w-4 h-4 border bg-zinc-900 flex items-center justify-center",
+                      checked ? "border-emerald-500 bg-emerald-950/30" : "border-zinc-700 group-hover:border-emerald-500"
+                    )}
+                    aria-hidden="true"
+                  >
+                    {checked ? <Check className="w-3 h-3 text-emerald-500" /> : null}
+                  </div>
+                  <span className={cn("text-sm cursor-pointer", checked ? "text-white" : "text-zinc-300 group-hover:text-white")}>{t}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -47,16 +126,44 @@ export function FilterSidebar() {
           <h4 className="text-xs font-bold text-emerald-500 mb-3 uppercase">Availability</h4>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-4 bg-emerald-900/30 border border-emerald-500/50 relative cursor-pointer">
-                 <div className="absolute right-0 top-0 bottom-0 w-4 bg-emerald-500" />
-              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={value.requireCode}
+                className={cn(
+                  "w-8 h-4 border relative cursor-pointer",
+                  value.requireCode ? "bg-emerald-900/30 border-emerald-500/50" : "bg-zinc-800 border-zinc-700"
+                )}
+                onClick={() => onChange({ ...value, requireCode: !value.requireCode })}
+              >
+                <div
+                  className={cn(
+                    "absolute top-0 bottom-0 w-4 transition-all",
+                    value.requireCode ? "right-0 bg-emerald-500" : "left-0 bg-zinc-500"
+                  )}
+                />
+              </button>
               <span className="text-sm text-zinc-300">Code Available</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-4 bg-zinc-800 border border-zinc-700 relative cursor-pointer">
-                 <div className="absolute left-0 top-0 bottom-0 w-4 bg-zinc-500" />
-              </div>
-              <span className="text-sm text-zinc-400">Data Available</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={value.requireData}
+                className={cn(
+                  "w-8 h-4 border relative cursor-pointer",
+                  value.requireData ? "bg-emerald-900/30 border-emerald-500/50" : "bg-zinc-800 border-zinc-700"
+                )}
+                onClick={() => onChange({ ...value, requireData: !value.requireData })}
+              >
+                <div
+                  className={cn(
+                    "absolute top-0 bottom-0 w-4 transition-all",
+                    value.requireData ? "right-0 bg-emerald-500" : "left-0 bg-zinc-500"
+                  )}
+                />
+              </button>
+              <span className={cn("text-sm", value.requireData ? "text-zinc-300" : "text-zinc-400")}>Data Available</span>
             </div>
           </div>
         </div>
@@ -64,15 +171,33 @@ export function FilterSidebar() {
         <div>
            <h4 className="text-xs font-bold text-emerald-500 mb-3 uppercase">Verification Level</h4>
            <div className="flex flex-col gap-1">
-             {[0, 1, 2, 3].map(l => (
-               <Button key={l} variant="ghost" size="sm" className="justify-start h-7 px-2 text-zinc-400 hover:text-white hover:bg-zinc-900">
-                 Level {l}
-               </Button>
-             ))}
+             {VERIFICATION_LEVELS.map((l) => {
+               const active = value.minLevel === l;
+               return (
+                 <Button
+                   key={l}
+                   type="button"
+                   variant="ghost"
+                   size="sm"
+                   className={cn(
+                     "justify-start h-7 px-2",
+                     active ? "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/15" : "text-zinc-400 hover:text-white hover:bg-zinc-900"
+                   )}
+                   onClick={() => onChange({ ...value, minLevel: active ? null : l })}
+                 >
+                   Level {l}+
+                 </Button>
+               );
+             })}
            </div>
         </div>
         
-        <Button variant="outline" className="w-full text-xs h-8 border-dashed border-zinc-700 text-zinc-500 hover:text-white">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full text-xs h-8 border-dashed border-zinc-700 text-zinc-500 hover:text-white"
+          onClick={clear}
+        >
           Clear All Filters
         </Button>
       </div>

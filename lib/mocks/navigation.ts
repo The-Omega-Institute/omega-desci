@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { stripBasePath, withBasePath } from "./basePath";
 
 // Event bus to trigger re-renders on route changes
 const listeners = new Set<() => void>();
@@ -34,11 +35,11 @@ export const useRouter = () => {
     push: (href: string, _options?: NavigateOptions) => {
       void _options;
       // Handle query params if passed in object (not supported in this simple mock, assuming string)
-      window.history.pushState({}, "", href);
+      window.history.pushState({}, "", withBasePath(href));
     },
     replace: (href: string, _options?: NavigateOptions) => {
       void _options;
-      window.history.replaceState({}, "", href);
+      window.history.replaceState({}, "", withBasePath(href));
     },
     back: () => {
       window.history.back();
@@ -72,12 +73,12 @@ export const useSearchParams = () => {
 
 export const usePathname = () => {
   const [pathname, setPathname] = useState(
-    typeof window !== "undefined" ? window.location.pathname : "/"
+    typeof window !== "undefined" ? stripBasePath(window.location.pathname) : "/"
   );
 
   useEffect(() => {
     const handleChange = () => {
-      setPathname(window.location.pathname);
+      setPathname(stripBasePath(window.location.pathname));
     };
     listeners.add(handleChange);
     return () => {

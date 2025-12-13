@@ -45,9 +45,39 @@ We explain our institutional design with four simple motivations.
 
 #### 1.2 动机二。我们要让高方差探索与学术可信同时成立 / Motivation 2: Make high-variance exploration and academic credibility coexist
 
-**中文：** 高方差探索的意思是：允许大胆假设。允许与主流不同。允许在早期很不成熟。传统期刊往往不喜欢高方差。你们要吸引的就是被这个系统排斥的人。
+**中文：** 高方差探索的意思是：允许大胆假设。允许与主流不同。允许在早期很不成熟。传统期刊往往不喜欢高方差。你们要吸引的就是被这个系统排斥的人。但如果没有可信度分层，高方差就会变成噪音。读者会觉得全是玄学。
 
-**EN:** High-variance exploration means allowing bold hypotheses, allowing deviations from the mainstream, and allowing work to be immature in its early stages. Traditional journals tend to dislike high-variance work. Omega should attract precisely the people filtered out by that system.
+**EN:** High-variance exploration means allowing bold hypotheses, allowing deviations from the mainstream, and allowing work to be immature in its early stages. Traditional journals tend to dislike high-variance work. Omega should attract precisely the people filtered out by that system. Without credibility stratification, high-variance exploration becomes noise; readers will experience it as mysticism.
+
+**对应平台策略 / Platform strategy:** 用可信度等级来承载高方差。Level 0 允许存在。Level 1 要求结构完整。Level 2 需要公开评审。Level 3 需要独立复核或验证。平台从不承诺 Level 0 或 Level 1 的结论正确。平台只承诺记录完整可追溯。
+
+**EN:** Use credibility levels to carry high-variance exploration: Level 0 may exist; Level 1 requires a complete structure; Level 2 requires open review; Level 3 requires independent replication or verification. Omega never promises that Level 0 or Level 1 conclusions are correct—it only promises the record is complete and traceable.
+
+#### 1.3 动机三。我们不 judge 人或 AI。但必须能追责和复核 / Motivation 3: We don’t judge humans or AI—but we must support accountability and re-audit
+
+**中文：** 不 judge 的意思是：不因为你是 AI 写的就否定。也不因为你是名校教授就加分。
+
+但学术系统必须有两个底线：责任主体。方法来源。否则任何错误都没法纠正，任何争议都没法收敛。
+
+**EN:** “Not judging” means we don’t dismiss work because it was written with AI, and we don’t award points because the author is a famous professor from an elite institution.
+
+But an academic system needs two non-negotiable baselines: a responsible party and method provenance. Without them, errors cannot be corrected and disputes cannot converge.
+
+**对应平台策略 / Platform strategy:** 你们不做 AI 道德审判。你们做方法与来源披露。只要某种工具或自动化流程影响了推导、代码、数据、结论或图表，它就属于方法学的一部分，必须记录，目的是复核，不是贴标签。
+
+**EN:** Omega does not run an AI morality court. We do method and provenance disclosure. If a tool or automated workflow affects the derivation, code, data, conclusions, or figures, it is part of the methodology and must be recorded. The goal is re-audit, not labeling.
+
+#### 1.4 动机四。我们要把审稿从黑箱变成可复用的公共资产 / Motivation 4: Turn peer review from a black box into a reusable public asset
+
+**中文：** 传统审稿常见问题是：黑箱。慢。个人偏见。审稿意见不能被引用。审稿人贡献不被计入学术资产。
+
+**EN:** Traditional peer review often suffers from: black-box processes, slowness, individual bias, review reports that cannot be cited, and reviewer contributions that are not counted as academic assets.
+
+**对应平台策略 / Platform strategy:** 公开评审。结构化评审。评审可引用。评审可获得声望与奖励。评审也是一种出版对象，不是评论区吵架。
+
+**EN:** Open review. Structured review. Citable reviews. Reviews earn reputation and rewards. A review is a publishable object—not a comment-section fight.
+
+### 2. 平台的北极星原则。所有功能都要服从这五条 / 2. North Star principles: all features must obey these five
 
 ### What problem this solves / 这解决了什么问题
 

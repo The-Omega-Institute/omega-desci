@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Paper } from "@/lib/mockData";
+import type { Paper, Review } from "@/lib/mockData";
 import type { ClaimEvidence, EvidencePointer } from "@/lib/review/evidence";
 import { 
   SheetContent, 
   Tabs, TabsList, TabsTrigger, TabsContent,
-  Button, Badge, ScrollArea
+  Button, Badge, ScrollArea,
+  TooltipProvider, Tooltip, TooltipTrigger, TooltipContent
 } from "@/components/ui/shadcn";
 import { EpistemicReviewPanel } from "@/components/review/EpistemicReviewPanel";
 import { SteelmanDefensePanel } from "@/components/review/SteelmanDefensePanel";
@@ -25,6 +27,13 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
   const [claimEvidence, setClaimEvidence] = useState<ClaimEvidence[]>([]);
   const [cardBusy, setCardBusy] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
+  const [tab, setTab] = useState("overview");
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+  const [copiedCodeHash, setCopiedCodeHash] = useState(false);
+  const [reviewDraft, setReviewDraft] = useState("");
+  const [reviewVerified, setReviewVerified] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [localReviews, setLocalReviews] = useState<Review[]>([]);
 
   const sourceUrl = useMemo(() => {
     if (!paper) return null;
@@ -32,6 +41,23 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
     if (paper.doi && paper.doi.startsWith("10.")) return `https://doi.org/${paper.doi}`;
     return null;
   }, [paper]);
+
+  useEffect(() => {
+    if (!paperId) return;
+    setTab("overview");
+    setSelectedVersion(paper?.versions?.[0]?.version ?? null);
+    setReviewDraft("");
+    setReviewVerified(false);
+    setReviewError(null);
+    setCardError(null);
+    setCopiedCodeHash(false);
+  }, [paperId, paper?.versions]);
+
+  useEffect(() => {
+    if (!copiedCodeHash) return;
+    const t = window.setTimeout(() => setCopiedCodeHash(false), 1200);
+    return () => window.clearTimeout(t);
+  }, [copiedCodeHash]);
 
   useEffect(() => {
     if (!paperId) return;
@@ -49,6 +75,25 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
     } catch {
       setEvidencePointers([]);
       setClaimEvidence([]);
+    }
+  }, [paperId]);
+
+  useEffect(() => {
+    if (!paperId) return;
+    try {
+      const raw = localStorage.getItem(`omega_reviews_v1:${paperId}`);
+      if (!raw) {
+        setLocalReviews([]);
+        return;
+      }
+      const parsed = JSON.parse(raw) as Partial<{ version: number; reviews: unknown }>;
+      if (parsed.version !== 1) {
+        setLocalReviews([]);
+        return;
+      }
+      setLocalReviews(Array.isArray(parsed.reviews) ? (parsed.reviews as Review[]) : []);
+    } catch {
+      setLocalReviews([]);
     }
   }, [paperId]);
 
@@ -79,6 +124,104 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
     } finally {
       setCardBusy(false);
     }
+  };
+
+  const copyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      try {
+        const el = document.createElement("textarea");
+        el.value = text;
+        el.setAttribute("readonly", "true");
+        el.style.position = "fixed";
+        el.style.left = "-9999px";
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+  };
+
+  const persistLocalReviews = (reviews: Review[]) => {
+    if (!paperId) return;
+    try {
+      localStorage.setItem(`omega_reviews_v1:${paperId}`, JSON.stringify({ version: 1, reviews }));
+    } catch {
+      // ignore persistence failures (private mode, etc.)
+    }
+  };
+
+  const copyCodeHash = async () => {
+    const value = paper?.codeHash || paper?.codeUrl;
+    if (!value) return;
+    const ok = await copyText(value);
+    if (ok) setCopiedCodeHash(true);
+  };
+
+  const parseReviewDraft = (text: string) => {
+    const strengths: string[] = [];
+    const concerns: string[] = [];
+
+    for (const rawLine of text.split("\n")) {
+      const line = rawLine.trim();
+      if (!line) continue;
+
+      if (line.startsWith("+")) strengths.push(line.slice(1).trim());
+      else if (line.startsWith("-")) concerns.push(line.slice(1).trim());
+      else if (/^strengths?:/i.test(line)) strengths.push(line.replace(/^strengths?:/i, "").trim());
+      else if (/^(concerns?|weaknesses?):/i.test(line)) concerns.push(line.replace(/^(concerns?|weaknesses?):/i, "").trim());
+      else concerns.push(line);
+    }
+
+    if (strengths.length === 0 && concerns.length === 0) concerns.push(text.trim());
+
+    return { strengths, concerns };
+  };
+
+  const postReview = async () => {
+    const draft = reviewDraft.trim();
+    if (!draft) {
+      setReviewError("Review cannot be empty.");
+      return;
+    }
+
+    const { strengths, concerns } = parseReviewDraft(draft);
+    const now = new Date();
+    const createdAt = now.toISOString().slice(0, 10);
+
+    const next: Review = {
+      id: `local-${now.getTime()}`,
+      author: "You",
+      verified: reviewVerified,
+      createdAt,
+      strengths,
+      concerns,
+    };
+
+    const nextReviews = [next, ...localReviews];
+    setLocalReviews(nextReviews);
+    persistLocalReviews(nextReviews);
+    setReviewDraft("");
+    setReviewVerified(false);
+    setReviewError(null);
+  };
+
+  const citeReview = async (review: Review) => {
+    if (!paper) return;
+    const citation = [
+      `Omega Institute Open Review (${review.createdAt}).`,
+      `"${paper.title}".`,
+      `Review by ${review.author}${review.verified ? " (Verified)" : ""}.`,
+      `DOI: ${paper.doi}.`,
+    ].join(" ");
+
+    await copyText(citation);
   };
 
   if (!paper) return null;
@@ -153,29 +296,35 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
                   ) : (
                     <span className="text-zinc-400">No active bounty</span>
                   )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <a href={`/conclusion?paper=${encodeURIComponent(paper.id)}`}>
-                    <Button size="sm" variant="outline" className="border-zinc-700 text-zinc-300 hover:border-emerald-500 hover:text-emerald-500">
-                      Conclusion
-                    </Button>
-                  </a>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-zinc-700 text-zinc-300 hover:border-emerald-500 hover:text-emerald-500"
-                    onClick={() => void generateReviewCard()}
-                    disabled={cardBusy}
-                  >
-                    {cardBusy ? "Generating..." : "Review Card"}
-                  </Button>
-                  {paper.replicationBounty?.active && (
-                     <Button size="sm" variant="outline" className="border-indigo-500 text-indigo-500 hover:bg-indigo-950">
-                       Start Replication
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <Link href={`/conclusion?paper=${encodeURIComponent(paper.id)}`}>
+                     <Button size="sm" variant="outline" className="border-zinc-700 text-zinc-300 hover:border-emerald-500 hover:text-emerald-500">
+                       Conclusion
                      </Button>
-                  )}
-                </div>
-             </div>
+                   </Link>
+                   <Button
+                     size="sm"
+                     variant="outline"
+                     className="border-zinc-700 text-zinc-300 hover:border-emerald-500 hover:text-emerald-500"
+                     onClick={() => void generateReviewCard()}
+                    disabled={cardBusy}
+                   >
+                     {cardBusy ? "Generating..." : "Review Card"}
+                   </Button>
+                   {paper.replicationBounty?.active && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="border-indigo-500 text-indigo-500 hover:bg-indigo-950"
+                        onClick={() => setTab("verify")}
+                      >
+                        Start Replication
+                      </Button>
+                   )}
+                 </div>
+              </div>
              {cardError ? (
                <div className="mt-3 border border-red-900/40 bg-red-950/20 p-3 text-sm text-red-300">
                  {cardError}
@@ -183,7 +332,7 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
              ) : null}
           </div>
 
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs value={tab} onValueChange={setTab} className="w-full">
             <TabsList className="w-full justify-start bg-transparent border-b border-zinc-800 rounded-none p-0 h-auto">
               <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent pb-3 pt-2">Overview</TabsTrigger>
               <TabsTrigger value="epistemic" className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent pb-3 pt-2">Epistemic</TabsTrigger>
@@ -191,7 +340,10 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
               <TabsTrigger value="verify" className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent pb-3 pt-2">Verify</TabsTrigger>
               <TabsTrigger value="versions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent pb-3 pt-2">History</TabsTrigger>
               <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent pb-3 pt-2">
-                Open Reviews <Badge className="ml-2 h-4 px-1 text-[10px]" variant="secondary">{paper.openReviewsCount}</Badge>
+                Open Reviews{" "}
+                <Badge className="ml-2 h-4 px-1 text-[10px]" variant="secondary">
+                  {paper.openReviewsCount + localReviews.length}
+                </Badge>
               </TabsTrigger>
               <TabsTrigger value="files" className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent pb-3 pt-2">Files & Code</TabsTrigger>
             </TabsList>
@@ -233,40 +385,87 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
                <VerificationWorkOrdersPanel paper={paper} evidencePointers={evidencePointers} claimEvidence={claimEvidence} />
              </TabsContent>
 
-             <TabsContent value="versions" className="pt-6">
-               <div className="relative border-l border-zinc-800 ml-3 space-y-6 pb-2">
-                 {paper.versions.map((v, i) => (
-                   <div key={i} className="pl-6 relative">
-                    <div className="absolute -left-[5px] top-1 w-2.5 h-2.5 bg-zinc-950 border border-emerald-500 rounded-none transform rotate-45" />
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-sm font-bold text-emerald-400 block">{v.version}</span>
-                        <span className="text-xs text-zinc-500 font-mono">{v.date}</span>
+              <TabsContent value="versions" className="pt-6">
+                <div className="relative border-l border-zinc-800 ml-3 space-y-6 pb-2">
+                  {paper.versions.map((v, i) => {
+                    const active = selectedVersion === v.version;
+                    return (
+                      <div
+                        key={i}
+                        className={
+                          "pl-6 relative border border-transparent p-2 -ml-2 " +
+                          (active ? "bg-emerald-500/5 border-emerald-500/20" : "")
+                        }
+                      >
+                        <div
+                          className={
+                            "absolute -left-[5px] top-3 w-2.5 h-2.5 bg-zinc-950 border rounded-none transform rotate-45 " +
+                            (active ? "border-emerald-500" : "border-zinc-700")
+                          }
+                        />
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="text-sm font-bold text-emerald-400 block">{v.version}</span>
+                            <span className="text-xs text-zinc-500 font-mono">{v.date}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className={"h-6 text-xs " + (active ? "text-emerald-400" : "")}
+                            onClick={() => setSelectedVersion(v.version)}
+                          >
+                            View
+                          </Button>
+                        </div>
+                        <p className="text-sm text-zinc-300 mt-1">{v.note}</p>
                       </div>
-                      <Button size="sm" variant="ghost" className="h-6 text-xs">View</Button>
-                    </div>
-                    <p className="text-sm text-zinc-300 mt-1">{v.note}</p>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
+                    );
+                  })}
+               </div>
+             </TabsContent>
 
             <TabsContent value="reviews" className="pt-6 space-y-6">
                {/* Mock Composer */}
                <div className="bg-zinc-900/30 border border-zinc-800 p-4">
                   <h4 className="text-sm font-semibold text-zinc-300 mb-2">Post a Review</h4>
-                  <textarea className="w-full bg-black border border-zinc-800 p-2 text-sm text-zinc-200 min-h-[80px] focus:outline-none focus:border-emerald-500" placeholder="Critique methodology, reproducibility, or clarity..." />
+                  <textarea
+                    className="w-full bg-black border border-zinc-800 p-2 text-sm text-zinc-200 min-h-[80px] focus:outline-none focus:border-emerald-500"
+                    placeholder="Use + for strengths, - for concerns (one per line), or write freeform notes..."
+                    value={reviewDraft}
+                    onChange={(e) => {
+                      setReviewDraft(e.target.value);
+                      if (reviewError) setReviewError(null);
+                    }}
+                  />
+                  {reviewError ? <div className="mt-3 text-xs text-red-300 font-mono">{reviewError}</div> : null}
                   <div className="flex justify-between items-center mt-3">
                      <div className="flex items-center gap-2">
-                       <input type="checkbox" className="accent-emerald-500" id="verified" />
-                       <label htmlFor="verified" className="text-xs text-zinc-500 cursor-pointer">Sign as Verified Scientist</label>
+                       <input
+                         type="checkbox"
+                         className="accent-emerald-500"
+                         id={`verified-${paperId}`}
+                         checked={reviewVerified}
+                         onChange={(e) => setReviewVerified(e.target.checked)}
+                       />
+                       <label htmlFor={`verified-${paperId}`} className="text-xs text-zinc-500 cursor-pointer">
+                         Sign as Verified Scientist
+                       </label>
                      </div>
-                     <Button size="sm" variant="emerald">Post Review</Button>
+                     <Button
+                       type="button"
+                       size="sm"
+                       variant="emerald"
+                       onClick={() => void postReview()}
+                       disabled={!reviewDraft.trim()}
+                     >
+                       Post Review
+                     </Button>
                   </div>
                </div>
 
                {/* Mock Reviews */}
-               {paper.reviews.length > 0 ? paper.reviews.map((review) => (
+               {[...localReviews, ...paper.reviews].length > 0 ? [...localReviews, ...paper.reviews].map((review) => (
                  <div key={review.id} className="border border-zinc-800 bg-zinc-950 p-4">
                     <div className="flex justify-between items-center mb-3">
                        <div className="flex items-center gap-2">
@@ -289,7 +488,13 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
                         </ul>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="h-6 text-[10px] text-zinc-500 hover:text-white">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-[10px] text-zinc-500 hover:text-white"
+                      onClick={() => void citeReview(review)}
+                    >
                       Cite this review
                     </Button>
                  </div>
@@ -300,32 +505,67 @@ export function PaperDrawer({ paper }: PaperDrawerProps) {
 
             <TabsContent value="files" className="pt-6 space-y-4">
               <div className="border border-zinc-800 divide-y divide-zinc-800">
-                 <div className="p-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                       <FileText className="w-4 h-4 text-zinc-400" />
-                       <span className="text-sm font-mono">manuscript_v1.2.pdf</span>
+                  <div className="p-3 flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                        <FileText className="w-4 h-4 text-zinc-400" />
+                        <span className="text-sm font-mono">manuscript_v1.2.pdf</span>
+                     </div>
+                    {sourceUrl ? (
+                      <a href={sourceUrl} target="_blank" rel="noreferrer">
+                        <Button variant="outline" size="sm" className="h-7 text-xs">
+                          Download
+                        </Button>
+                      </a>
+                    ) : (
+                      <Button variant="outline" size="sm" className="h-7 text-xs" disabled>
+                        Download
+                      </Button>
+                    )}
+                  </div>
+                  {paper.codeAvailable && (
+                    <div className="p-3 flex flex-col gap-2">
+                       <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <GitBranch className="w-4 h-4 text-emerald-500" />
+                            <span className="text-sm font-mono text-emerald-400">Source Code Repository</span>
+                         </div>
+                        {paper.codeUrl ? (
+                          <a href={paper.codeUrl} target="_blank" rel="noreferrer">
+                            <Button variant="outline" size="sm" className="h-7 text-xs">
+                              Visit Repo
+                            </Button>
+                          </a>
+                        ) : (
+                          <Button variant="outline" size="sm" className="h-7 text-xs" disabled>
+                            Visit Repo
+                          </Button>
+                        )}
+                       </div>
+                       <div className="bg-zinc-950 p-2 font-mono text-xs text-zinc-500 flex justify-between items-center">
+                         <span className="truncate pr-3">
+                           {paper.codeHash ? `Hash: ${paper.codeHash}` : paper.codeUrl ? `Repo: ${paper.codeUrl}` : "No code reference"}
+                         </span>
+                         <TooltipProvider>
+                           <Tooltip>
+                             <TooltipTrigger asChild>
+                               <button
+                                 type="button"
+                                 className="text-zinc-500 hover:text-white disabled:opacity-40"
+                                 onClick={() => void copyCodeHash()}
+                                 disabled={!paper.codeHash && !paper.codeUrl}
+                                 aria-label="Copy code reference"
+                               >
+                                 <Copy className="w-3 h-3" />
+                               </button>
+                             </TooltipTrigger>
+                             <TooltipContent>{copiedCodeHash ? "Copied" : "Copy"}</TooltipContent>
+                           </Tooltip>
+                         </TooltipProvider>
+                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="h-7 text-xs">Download</Button>
-                 </div>
-                 {paper.codeAvailable && (
-                   <div className="p-3 flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                           <GitBranch className="w-4 h-4 text-emerald-500" />
-                           <span className="text-sm font-mono text-emerald-400">Source Code Repository</span>
-                        </div>
-                        <a href={paper.codeUrl} target="_blank" rel="noreferrer">
-                          <Button variant="outline" size="sm" className="h-7 text-xs">Visit Repo</Button>
-                        </a>
-                      </div>
-                      <div className="bg-zinc-950 p-2 font-mono text-xs text-zinc-500 flex justify-between items-center">
-                         {paper.codeHash}
-                         <Copy className="w-3 h-3 cursor-pointer hover:text-white" />
-                      </div>
-                   </div>
-                 )}
-              </div>
-            </TabsContent>
+                  )}
+               </div>
+             </TabsContent>
           </Tabs>
         </div>
       </ScrollArea>

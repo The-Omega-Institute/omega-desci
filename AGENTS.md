@@ -10,6 +10,8 @@
 - `metadata.json`: AI Studio app metadata (name/description).
 - `index.html` + `index.tsx`: standalone preview entry (AI Studio/importmap). If you change routing or Next-specific imports, keep these preview mocks working.
 
+
+
 ## Build, Test, and Development Commands
 - Prerequisite: Node.js 18+.
 - `npm install`: install dependencies.
