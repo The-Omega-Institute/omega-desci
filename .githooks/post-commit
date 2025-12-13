@@ -1,0 +1,31 @@
+#!/bin/sh
+set -u
+
+# Omega workflow: auto-push after each commit.
+# Disable: git config omega.autoPush false
+
+enabled="$(git config --bool omega.autoPush 2>/dev/null || true)"
+if [ "${enabled:-}" = "false" ]; then
+  exit 0
+fi
+
+branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [ -z "${branch:-}" ]; then
+  exit 0
+fi
+
+if ! git remote get-url origin >/dev/null 2>&1; then
+  exit 0
+fi
+
+if git rev-parse --abbrev-ref --symbolic-full-name "@{u}" >/dev/null 2>&1; then
+  if ! git push; then
+    echo "post-commit: auto-push failed; run 'git push' manually." >&2
+  fi
+else
+  if ! git push -u origin "$branch"; then
+    echo "post-commit: auto-push failed; run 'git push -u origin $branch' manually." >&2
+  fi
+fi
+
+exit 0

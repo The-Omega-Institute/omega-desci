@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omega.institute/schemas/omega-review-protocol-v1.json",
+  "title": "Omega Review Protocol Artifact v1",
+  "type": "object",
+  "required": ["version", "protocol", "id", "createdAt", "hashAlg", "hash", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "protocol": { "const": "omega-review-protocol-v1" },
+    "id": { "type": "string", "minLength": 3 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "hashAlg": { "const": "sha256" },
+    "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "payload": { "$ref": "#/$defs/payload" }
+  },
+  "$defs": {
+    "paper": {
+      "type": "object",
+      "required": ["id", "title"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "doi": { "type": "string" },
+        "abstract": { "type": "string" },
+        "importedFrom": { "type": "string" },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "name": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": ["id", "claim", "evidenceIds"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "claim": { "type": "string", "minLength": 1 },
+        "evidenceIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["id", "type", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["figure", "table", "data", "code", "stat_test", "appendix", "doi", "url"]
+        },
+        "label": { "type": "string", "minLength": 1 },
+        "ref": { "type": "string" },
+        "url": { "type": "string" },
+        "doi": { "type": "string" },
+        "hash": { "type": "string" },
+        "commit": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "test": {
+      "type": "object",
+      "required": ["id", "dimension", "label", "status", "detail"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "dimension": {
+          "type": "string",
+          "enum": ["value", "falsifiability", "evidence", "robustness", "reproducibility", "causal", "ethics"]
+        },
+        "label": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["pass", "needs_evidence", "fail", "na"] },
+        "detail": { "type": "string" },
+        "fix": { "type": "string" },
+        "weight": { "type": "number" }
+      }
+    },
+    "task": {
+      "type": "object",
+      "required": ["id", "kind", "status"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "enum": ["reproduction_ticket", "safety_scan", "schema_validation"] },
+        "status": { "type": "string", "enum": ["queued", "running", "succeeded", "failed", "manual"] },
+        "queueJobId": { "type": "string" }
+      }
+    },
+    "riskFlag": {
+      "type": "object",
+      "required": ["id", "severity", "title", "detail", "fix"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+        "title": { "type": "string", "minLength": 1 },
+        "detail": { "type": "string" },
+        "fix": { "type": "string" }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "required": ["paper", "claims", "evidence", "tests"],
+      "additionalProperties": true,
+      "properties": {
+        "paper": { "$ref": "#/$defs/paper" },
+        "claims": { "type": "array", "items": { "$ref": "#/$defs/claim" } },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+        "tests": { "type": "array", "items": { "$ref": "#/$defs/test" } },
+        "tasks": { "type": "array", "items": { "$ref": "#/$defs/task" } },
+        "riskFlags": { "type": "array", "items": { "$ref": "#/$defs/riskFlag" } },
+        "attacks": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+        "sources": { "type": "object", "additionalProperties": true }
+      }
+    }
+  }
+}
+

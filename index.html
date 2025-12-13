@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Omega Institute</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        container: {
+          center: true,
+          padding: "2rem",
+          screens: {
+            "2xl": "1400px",
+          },
+        },
+        extend: {
+          fontFamily: {
+            sans: ["var(--font-inter)", "sans-serif"],
+            serif: ["var(--font-plex-serif)", "serif"],
+            mono: ["var(--font-jetbrains)", "monospace"],
+          },
+          colors: {
+            border: "hsl(var(--border))",
+            input: "hsl(var(--input))",
+            ring: "hsl(var(--ring))",
+            background: "hsl(var(--background))",
+            foreground: "hsl(var(--foreground))",
+            primary: {
+              DEFAULT: "hsl(var(--primary))",
+              foreground: "hsl(var(--primary-foreground))",
+            },
+            secondary: {
+              DEFAULT: "hsl(var(--secondary))",
+              foreground: "hsl(var(--secondary-foreground))",
+            },
+            destructive: {
+              DEFAULT: "hsl(var(--destructive))",
+              foreground: "hsl(var(--destructive-foreground))",
+            },
+            muted: {
+              DEFAULT: "hsl(var(--muted))",
+              foreground: "hsl(var(--muted-foreground))",
+            },
+            accent: {
+              DEFAULT: "hsl(var(--accent))",
+              foreground: "hsl(var(--accent-foreground))",
+            },
+            popover: {
+              DEFAULT: "hsl(var(--popover))",
+              foreground: "hsl(var(--popover-foreground))",
+            },
+            card: {
+              DEFAULT: "hsl(var(--card))",
+              foreground: "hsl(var(--card-foreground))",
+            },
+            omega: {
+              green: "#10b981", 
+              blue: "#6366f1", 
+              dark: "#09090b", 
+            }
+          },
+          borderRadius: {
+            lg: "0",
+            md: "0",
+            sm: "0",
+          },
+        },
+      },
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      :root {
+        --background: 240 10% 3.9%;
+        --foreground: 0 0% 98%;
+        --card: 240 10% 3.9%;
+        --card-foreground: 0 0% 98%;
+        --popover: 240 10% 3.9%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 0 0% 98%;
+        --primary-foreground: 240 5.9% 10%;
+        --secondary: 240 3.7% 15.9%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 3.7% 15.9%;
+        --muted-foreground: 240 5% 64.9%;
+        --accent: 240 3.7% 15.9%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 3.7% 15.9%;
+        --input: 240 3.7% 15.9%;
+        --ring: 240 4.9% 83.9%;
+        --radius: 0px;
+      }
+    }
+    @layer base {
+      * {
+        @apply border-border;
+      }
+      body {
+        @apply bg-background text-foreground;
+      }
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border: 1px solid #09090b;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@^18.2.0/client",
+    "react/": "https://esm.sh/react@^18.2.0/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.378.0",
+    "clsx": "https://esm.sh/clsx@^2.1.1",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@^2.3.0",
+    "class-variance-authority": "https://esm.sh/class-variance-authority@^0.7.0",
+    "@radix-ui/react-slot": "https://esm.sh/@radix-ui/react-slot@^1.0.2",
+    "@radix-ui/react-dialog": "https://esm.sh/@radix-ui/react-dialog@^1.0.5",
+    "@radix-ui/react-separator": "https://esm.sh/@radix-ui/react-separator@^1.0.3",
+    "@radix-ui/react-tabs": "https://esm.sh/@radix-ui/react-tabs@^1.0.4",
+    "@radix-ui/react-scroll-area": "https://esm.sh/@radix-ui/react-scroll-area@^1.0.5",
+    "@radix-ui/react-tooltip": "https://esm.sh/@radix-ui/react-tooltip@^1.0.7",
+    "@/components/": "./components/",
+    "@/lib/": "./lib/",
+    "@/app/": "./app/",
+    "next/navigation": "./lib/mocks/navigation.ts",
+    "next/font/google": "./lib/mocks/font.ts",
+    "next/link": "./lib/mocks/link.tsx",
+    "next/image": "./lib/mocks/image.tsx",
+    "tailwindcss": "https://esm.sh/tailwindcss@^4.1.18",
+    "next/": "https://esm.sh/next@^16.0.10/",
+    "next": "https://esm.sh/next@^16.0.10",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-zinc-950 text-zinc-100">
+  <div id="root"></div>
+  <script type="module" src="./index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
