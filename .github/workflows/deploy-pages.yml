@@ -25,6 +25,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run pages:build
+        env:
+          # This Pages site is served on a custom domain root (not /<repo>/),
+          # so the Vite build base must be "/" or assets will 404.
+          VITE_BASE: /
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -37,4 +41,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-
