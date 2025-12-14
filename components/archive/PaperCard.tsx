@@ -60,7 +60,7 @@ export function PaperCard({ paper, onClick }: PaperCardProps) {
                 Level {paper.level}
               </Badge>
             )}
-            {paper.level === 0 && <Badge variant="muted">Draft</Badge>}
+            {paper.level === 0 && <Badge variant="muted">Archived</Badge>}
           </div>
         </div>
         

@@ -67,6 +67,9 @@ export default function ArxivReviewPage() {
             <div className="text-[10px] font-mono text-zinc-600">AI_INITIAL_REVIEW_AS_A_SERVICE</div>
             <h1 className="text-2xl md:text-3xl font-serif text-zinc-100">Generate a structured Omega review card</h1>
             <p className="text-sm text-zinc-500">Paste an arXiv or Zenodo link and get a citeable artifact + embeddable card.</p>
+            <p className="text-xs text-zinc-600 font-mono">
+              AI_AUDIT_LINE_ONLY — AI reports are audit tools and do not decide Level upgrades; human open reviews do. / AI 审计线：AI 只做审计不做裁决，Level 升级由人类评审线决定。
+            </p>
           </div>
           <Badge variant="emerald" className="font-mono text-[10px]">
             NO_BACKEND_DB • MOCK_FRIENDLY
@@ -185,4 +188,3 @@ export default function ArxivReviewPage() {
     </div>
   );
 }
-

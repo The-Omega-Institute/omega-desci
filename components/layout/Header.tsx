@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/shadcn";
 import { Input } from "@/components/ui/shadcn";
-import { Search, Wallet, BookOpen, Sparkles, Gavel, Network } from "lucide-react";
+import { Search, Wallet, BookOpen, Sparkles, Gavel, Network, User } from "lucide-react";
 import { cn, truncateAddress } from "@/lib/utils";
 
 export function Header() {
@@ -74,6 +74,13 @@ export function Header() {
               <Button variant="ghost" size="icon" className="h-9 w-9 text-zinc-400 hover:text-emerald-500">
                 <BookOpen className="h-5 w-5" />
                 <span className="sr-only">Policies</span>
+              </Button>
+            </Link>
+
+            <Link href="/profile">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-zinc-400 hover:text-emerald-500">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Profile</span>
               </Button>
             </Link>
             

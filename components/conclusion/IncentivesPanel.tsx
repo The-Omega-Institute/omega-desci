@@ -294,8 +294,17 @@ export function IncentivesPanel({
         <CardTitle className="text-zinc-100">Incentives</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="text-sm text-zinc-400">
-          Rewards are mock/local-only. Validators earn tokens only after random audit; authors can claim once after passing adversarial defense + verification gates.
+        <div className="text-sm text-zinc-400 space-y-2">
+          <div>
+            EN: We do not reward “taking sides”. We reward verification: reproducibility tickets, evidence-backed counterexamples, and successful audits. This demo’s rewards are
+            mock/local-only.
+          </div>
+          <div>
+            中文：我们不奖励“站队”，我们奖励验证：复现工单、带证据的反例报告、以及对他人提交的随机审计。本 Demo 的奖励仅在本地模拟。
+          </div>
+          <div className="text-xs text-zinc-500">
+            Settlement rule / 结算规则：validators earn tokens only after random audit; authors can claim once after passing adversarial defense + evidence/verification gates.
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -313,7 +322,7 @@ export function IncentivesPanel({
               </Badge>
             </div>
             <div className="text-xs text-zinc-500">
-              Tip: create two validator handles; one submits PASS, the other claims and submits the audit to release rewards.
+              Tip: create two validator handles; one submits PASS, the other claims and submits the audit to release rewards. / 提示：创建两个验证者身份；一位提交 PASS，另一位领取并提交审计以释放奖励。
             </div>
           </div>
 
@@ -376,6 +385,9 @@ export function IncentivesPanel({
                 REWARD: {authorRewardELF} ELF
               </Badge>
             </div>
+            <div className="text-xs text-zinc-500">
+              Policy: rewards track verifiable work (defense pass, evidence coverage, verified tickets) — not popularity. / 政策：奖励可验证的工作（对抗式辩护、证据覆盖、已验证工单），不奖励人气与站队。
+            </div>
 
             {!eligibility.eligible ? (
               <div className="text-xs text-zinc-500 space-y-1">
@@ -427,4 +439,3 @@ export function IncentivesPanel({
     </Card>
   );
 }
-

@@ -289,7 +289,7 @@ export function ConclusionPage() {
           doi: "N/A",
           collectionVolume: "N/A",
           level: 0,
-          articleType: "Preprint",
+          articleType: "Theory Preprint",
           discipline: "Digital Physics",
           keywords: [],
           authors: [{ name: "Unknown", isAI: false }],

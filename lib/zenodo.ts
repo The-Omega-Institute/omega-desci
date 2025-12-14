@@ -66,11 +66,15 @@ function humanizeCommunityId(id: string) {
 
 function inferArticleType(title: string, keywords: string[]): Paper["articleType"] {
   const haystack = `${title}\n${keywords.join(" ")}`.toLowerCase();
-  if (/(survey|review|overview)\b/.test(haystack)) return "Survey";
+  if (/(survey|review|overview|synthesis)\b/.test(haystack)) return "Survey or Synthesis";
+  if (/(critique|commentary|rebuttal|response|comment)\b/.test(haystack)) return "Critique or Commentary";
+  if (/(verification|formal verification|counterexample|proof check)\b/.test(haystack)) return "Verification Report";
   if (/(replication|reproduc)/.test(haystack)) return "Replication Report";
   if (/(negative result|null result|failed to)\b/.test(haystack)) return "Negative Result";
-  if (/(method|protocol|implementation)\b/.test(haystack)) return "Methods Note";
-  return "Preprint";
+  if (/(conjecture|open problem|research agenda)\b/.test(haystack)) return "Conjecture Note";
+  if (/(proof|theorem|lemma|axiom|formal derivation)\b/.test(haystack)) return "Proof or Formal Derivation";
+  if (/(simulation|numerical|cellular automata|monte carlo|computational experiment)\b/.test(haystack)) return "Computational Experiment";
+  return "Theory Preprint";
 }
 
 function inferDiscipline(title: string, keywords: string[]): Paper["discipline"] {

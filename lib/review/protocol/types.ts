@@ -8,6 +8,7 @@ export type OmegaReviewProtocolId = "omega-review-protocol-v1";
 export type OmegaReviewClaimV1 = {
   id: string;
   claim: string;
+  sourceRef?: string;
   evidenceIds: string[];
 };
 
@@ -64,4 +65,3 @@ export type OmegaReviewArtifactV1 = {
   hash: string;
   payload: OmegaReviewPayloadV1;
 };
-

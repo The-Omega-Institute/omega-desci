@@ -21,7 +21,16 @@ export type EvidencePointer = {
 };
 
 export type ClaimEvidence = {
+  /**
+   * Optional stable identifier (e.g. C1, C2, C3…).
+   * When omitted, UIs and engines may derive an id from array order.
+   */
+  id?: string;
   claim: string;
+  /**
+   * Body anchor reference for the claim (paragraph / proposition / theorem id, etc.).
+   */
+  sourceRef?: string;
   evidenceIds: string[];
 };
 
@@ -37,4 +46,3 @@ export function formatEvidencePointer(p: EvidencePointer) {
   if (p.note) parts.push(`note=${p.note}`);
   return parts.join(" | ");
 }
-

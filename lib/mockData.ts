@@ -16,22 +16,224 @@ export interface Version {
 export interface Review {
   id: string;
   author: string;
+  anonymous?: boolean;
   verified: boolean;
-  createdAt: string;
+  createdAt: string; // ISO timestamp
+  hash?: string;
+  coi: string;
+  addressed?: {
+    addressedAt: string;
+    addressedBy: string;
+    note?: string;
+  };
+
+  /**
+   * Optional provenance for curated/imported external reviews.
+   * - `community`: a review authored inside Omega.
+   * - `imported`: a curated external review (incl. external AI/agentic reviewer outputs).
+   */
+  origin?: "community" | "imported";
+  source?: {
+    url: string;
+    platform?: string;
+    originalAuthor?: string;
+    originalCreatedAt?: string; // ISO or date string (best-effort)
+    license?: string;
+    permission?: "link_only" | "licensed" | "authorized";
+    systemName?: string;
+    systemCreator?: string;
+  };
+  curation?: {
+    curator?: string;
+    curatedAt?: string; // ISO timestamp
+    mappedClaims?: string[];
+  };
+
+  summary: string;
   strengths: string[];
   concerns: string[];
+  falsifiabilityAssessment: string;
+  technicalCorrectnessAssessment: string;
+  verificationReadiness: string;
+  requestedChanges: string[];
+  recommendation: string;
 }
+
+export type ExternalReviewSourceType = "ai_system" | "human" | "mixed";
+
+export type ExternalReviewSourceAccess = "public_url" | "token_gated" | "screenshot_only" | "export";
+
+export type ExternalReviewCuratorRole = "curation" | "normalization" | "translation" | "claim-mapping" | "citation-check";
+
+export type ExternalReviewEvidenceAttachmentKind = "screenshot" | "export" | "link" | "other";
+
+export interface ExternalReviewEvidenceAttachment {
+  id: string;
+  kind: ExternalReviewEvidenceAttachmentKind;
+  label: string;
+  url?: string;
+  note?: string;
+  sha256?: string;
+}
+
+export type ExternalReviewArtifactStatus = "pending" | "approved" | "soft_hidden" | "removed";
+
+export interface ExternalReviewVote {
+  by: string;
+  at: string; // ISO timestamp
+}
+
+export interface ExternalReviewValidation {
+  helpfulVotes?: ExternalReviewVote[];
+  addressed?: {
+    addressedAt: string;
+    addressedBy: string;
+    note?: string;
+  };
+  highSignal?: {
+    markedAt: string;
+    markedBy: string;
+    note?: string;
+  };
+}
+
+export interface ExternalReviewArtifact {
+  id: string;
+  paperId: string;
+  paperVersionId?: string;
+  paperDoi?: string;
+  createdAt: string; // ISO timestamp (imported into Omega)
+  hash?: string;
+  status: ExternalReviewArtifactStatus;
+  statusReason?: string;
+  source: {
+    systemName?: string; // source_system_name
+    type: ExternalReviewSourceType; // source_type
+    url?: string; // source_url (optional when screenshot-only/export)
+    access: ExternalReviewSourceAccess; // source_access
+    platform?: string;
+    originalAuthor?: string;
+    originalCreatedAt?: string; // ISO or date string (best-effort)
+    license?: string;
+    permission: "link_only" | "licensed" | "authorized";
+    systemCreators?: string[];
+    disclaimer?: string; // source_disclaimer (summary)
+  };
+  curator: {
+    userId: string; // curator_user_id (demo uses handle)
+    roles: ExternalReviewCuratorRole[];
+    attestation: string; // curator_attestation
+    signature?: string; // curator_signature
+    curatedAt: string; // ISO timestamp
+    coi: string;
+    mappedClaims?: string[];
+    mappedTargets?: string[]; // claim ids or paragraph/section anchors (e.g., C1, #p3, §2.1)
+  };
+  evidenceAttachments?: ExternalReviewEvidenceAttachment[];
+  validation?: ExternalReviewValidation;
+  withdrawal?: {
+    withdrawnAt: string;
+    withdrawnBy: string;
+    reason?: string;
+  };
+  moderation?: {
+    reviewedAt?: string;
+    reviewedBy?: string;
+    note?: string;
+  };
+  content: {
+    summary: string;
+    strengths: string[];
+    weaknesses: string[];
+    questions: string[];
+    detailedComments: string;
+    overallAssessment: string;
+  };
+}
+
+export type CommentKind = "question" | "suggestion" | "reference" | "concern" | "counterexample";
+
+export type CommentStatus = "open" | "resolved" | "incorporated";
+
+export type CommentAuthorRole = "community" | "author" | "editor";
+
+export type CommentVisibility = "queued" | "published";
+
+export interface CommentReply {
+  id: string;
+  author: string;
+  authorRole?: CommentAuthorRole;
+  createdAt: string;
+  body: string;
+}
+
+export interface Comment {
+  id: string;
+  author: string;
+  authorRole?: CommentAuthorRole;
+  createdAt: string;
+  kind: CommentKind;
+  body: string;
+  targetRef?: string;
+  visibility?: CommentVisibility; // tiered permissions: new accounts may enqueue comments
+  removed?: boolean; // content removed (metadata retained) for auditability
+  mergedIntoId?: string; // duplicate merge target (canonical comment id)
+  status?: CommentStatus;
+  softHidden?: boolean;
+  replies?: CommentReply[];
+}
+
+export type StructuredAbstract = {
+  problem: string;
+  approach: string;
+  keyClaims: string;
+  limitations: string;
+};
+
+export type ContributorRole =
+  | "Conceptualization"
+  | "Methodology"
+  | "Software"
+  | "Validation"
+  | "Writing"
+  | "Visualization";
+
+export type NonHumanContributor = {
+  name: string;
+  versionOrId?: string;
+  scope?: string;
+  promptStrategy?: string;
+  validationSummary?: string;
+};
 
 export interface Paper {
   id: string;
   title: string;
   abstract: string;
+  abstractStructured?: StructuredAbstract;
+  provenanceStatement?: string;
+  responsibleStewards?: string[];
+  contributorRoles?: Partial<Record<ContributorRole, string[]>>;
+  nonHumanContributors?: NonHumanContributor[];
   doi: string;
   collectionVolume: string;
   level: VerificationLevel;
-  articleType: "Preprint" | "Methods Note" | "Replication Report" | "Survey" | "Negative Result";
+  articleType:
+    | "Theory Preprint"
+    | "Conjecture Note"
+    | "Proof or Formal Derivation"
+    | "Computational Experiment"
+    | "Verification Report"
+    | "Replication Report"
+    | "Negative Result"
+    | "Survey or Synthesis"
+    | "Critique or Commentary";
   discipline: "Digital Physics" | "Cellular Automata" | "Thermodynamics" | "AI Foundations" | "Cosmology";
   keywords: string[];
+  tags?: string[];
+  license?: string;
+  competingInterests?: string;
+  funding?: string;
   authors: Author[];
   aiContributionPercent: number;
   codeAvailable: boolean;
@@ -43,6 +245,7 @@ export interface Paper {
   versions: Version[];
   openReviewsCount: number;
   reviews: Review[];
+  comments?: Comment[];
   replicationBounty?: {
     active: boolean;
     amountELF: number;
@@ -60,7 +263,7 @@ export const papers: Paper[] = [
     doi: "10.5281/zenodo.9928112",
     collectionVolume: "Vol 1. Digital Physics",
     level: 2,
-    articleType: "Preprint",
+    articleType: "Theory Preprint",
     discipline: "Digital Physics",
     keywords: ["Rule 30", "Entropy", "Inflation", "Wolfram Physics"],
     authors: [
@@ -83,10 +286,26 @@ export const papers: Paper[] = [
       {
         id: "r1",
         author: "Prof. S. Glitch",
+        anonymous: false,
         verified: true,
-        createdAt: "2024-05-02",
-        strengths: ["Novel methodology", "Reproducible code"],
-        concerns: ["Boundary condition assumptions are weak"]
+        createdAt: "2024-05-02T09:30:00.000Z",
+        coi: "None",
+        summary: "A creative link between Rule 30 entropy dynamics and inflation-style behavior, backed by a runnable simulation pipeline.",
+        strengths: ["Novel methodology", "Reproducible code + clear parameters", "Evidence is easy to re-audit"],
+        concerns: ["Boundary condition assumptions are weak and under-justified", "Some claims are not explicitly linked to figures/tables"],
+        falsifiabilityAssessment:
+          "Partially falsifiable via simulation-based predictions; needs clearer claim-to-test mapping (C1..Cn) and explicit failure thresholds.",
+        technicalCorrectnessAssessment:
+          "The core derivation appears plausible, but the boundary-condition regime and sensitivity analysis require deeper treatment.",
+        verificationReadiness:
+          "High: code is available and parameters are stated; recommend an independent rerun on larger grids + parameter sweep to confirm robustness.",
+        requestedChanges: [
+          "Add a numbered claims list (C1..Cn) and link each to specific figures/tables.",
+          "Strengthen boundary-condition rationale and include sensitivity/ablation results.",
+          "Provide a reproducibility note: exact commit/hash, environment, and deterministic seeds.",
+        ],
+        recommendation:
+          "Eligible for Level 2 after: (1) explicit claim→evidence anchors, (2) boundary-condition + sensitivity analysis, (3) reproducibility anchors (commit/hash + env).",
       }
     ],
     replicationBounty: { active: true, amountELF: 500 },
@@ -124,7 +343,7 @@ export const papers: Paper[] = [
     doi: "10.5281/zenodo.7748291",
     collectionVolume: "Vol 2. Info Theory",
     level: 1,
-    articleType: "Preprint",
+    articleType: "Theory Preprint",
     discipline: "Thermodynamics",
     keywords: ["Black Holes", "Kolmogorov", "Information Paradox"],
     authors: [
@@ -170,7 +389,7 @@ export const papers: Paper[] = [
     doi: "10.5281/zenodo.5566778",
     collectionVolume: "Vol 1. Digital Physics",
     level: 1,
-    articleType: "Survey",
+    articleType: "Survey or Synthesis",
     discipline: "Cellular Automata",
     keywords: ["Chemistry", "Turing Complete", "Unconventional Computing"],
     authors: [{ name: "Dr. K. Chen", isAI: false, orcid: "0000-0001-5555-1234" }],
@@ -190,7 +409,7 @@ export const papers: Paper[] = [
     doi: "10.5281/zenodo.4433221",
     collectionVolume: "Vol 2. Info Theory",
     level: 2,
-    articleType: "Methods Note",
+    articleType: "Computational Experiment",
     discipline: "Thermodynamics",
     keywords: ["RL", "Maxwell Demon", "Entropy", "DeepMind"],
     authors: [
@@ -219,7 +438,7 @@ for (let i = 7; i <= 12; i++) {
     doi: `10.5281/zenodo.000000${i}`,
     collectionVolume: "Vol 4. Generative Science",
     level: (i % 4) as VerificationLevel,
-    articleType: "Preprint",
+    articleType: "Theory Preprint",
     discipline: DISCIPLINES[i % 5],
     keywords: ["Genetic Algo", "Physics", "Simulation"],
     authors: [{ name: "Omega AI", isAI: true }],

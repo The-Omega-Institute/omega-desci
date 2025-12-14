@@ -171,13 +171,14 @@ export async function POST(request: Request) {
   const inferredClaims =
     claimEvidence.filter((c) => c.claim.trim().length > 0).length > 0
       ? claimEvidence.map((c, idx) => ({
-          id: `clm-${idx + 1}`,
+          id: typeof c.id === "string" && c.id.trim() ? c.id.trim() : `C${idx + 1}`,
           claim: c.claim.trim(),
+          sourceRef: typeof c.sourceRef === "string" && c.sourceRef.trim() ? c.sourceRef.trim() : undefined,
           evidenceIds: Array.isArray(c.evidenceIds) ? c.evidenceIds : [],
         }))
-      : (epistemicReview.extracted?.claims || []).map((c, idx) => ({ id: `clm-${idx + 1}`, claim: c, evidenceIds: [] }));
+      : (epistemicReview.extracted?.claims || []).map((c, idx) => ({ id: `C${idx + 1}`, claim: c, evidenceIds: [] }));
 
-  const fallback = !inferredClaims.length ? extractFallbackClaims(paper.abstract || "").map((c, idx) => ({ id: `clm-${idx + 1}`, claim: c, evidenceIds: [] })) : [];
+  const fallback = !inferredClaims.length ? extractFallbackClaims(paper.abstract || "").map((c, idx) => ({ id: `C${idx + 1}`, claim: c, evidenceIds: [] })) : [];
   const claims: OmegaReviewClaimV1[] = (inferredClaims.length ? inferredClaims : fallback).filter((c) => c.claim.trim().length > 0);
 
   const risk = computeRiskReport({ paper, evidencePointers, claimEvidence, selfReport });

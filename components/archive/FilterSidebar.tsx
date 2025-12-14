@@ -16,11 +16,15 @@ const DISCIPLINES: Paper["discipline"][] = [
 ];
 
 const ARTICLE_TYPES: Paper["articleType"][] = [
-  "Preprint",
-  "Methods Note",
+  "Theory Preprint",
+  "Conjecture Note",
+  "Proof or Formal Derivation",
+  "Computational Experiment",
+  "Verification Report",
   "Replication Report",
-  "Survey",
   "Negative Result",
+  "Survey or Synthesis",
+  "Critique or Commentary",
 ];
 
 const VERIFICATION_LEVELS: VerificationLevel[] = [0, 1, 2, 3];
@@ -205,13 +209,13 @@ export function FilterSidebar({ value, onChange, onClear, className }: FilterSid
       <Separator />
 
       <div className="space-y-2">
-        <h4 className="text-xs font-bold text-zinc-500 uppercase mb-2">Policy Quick Links</h4>
-        <div className="flex flex-col gap-1 text-xs">
-          <Link href="/policies" className="text-zinc-400 hover:text-emerald-500 transition-colors">Scope and Article Types</Link>
-          <Link href="/policies" className="text-zinc-400 hover:text-emerald-500 transition-colors">AI Disclosure</Link>
-          <Link href="/policies" className="text-zinc-400 hover:text-emerald-500 transition-colors">Ethical Standards</Link>
-        </div>
-      </div>
-    </aside>
-  );
-}
+         <h4 className="text-xs font-bold text-zinc-500 uppercase mb-2">Policy Quick Links</h4>
+         <div className="flex flex-col gap-1 text-xs">
+           <Link href="/policies" className="text-zinc-400 hover:text-emerald-500 transition-colors">Scope and Article Types</Link>
+           <Link href="/policies" className="text-zinc-400 hover:text-emerald-500 transition-colors">Provenance & Tooling</Link>
+           <Link href="/policies" className="text-zinc-400 hover:text-emerald-500 transition-colors">Ethical Standards</Link>
+         </div>
+       </div>
+     </aside>
+   );
+ }

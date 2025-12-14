@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/shadcn";
 export function Footer() {
   const policies = [
     "Scope and Article Types",
-    "AI Disclosure and Authorship",
+    "Provenance and Tooling Statement",
     "Open Peer Review Norms",
     "Data and Code Availability",
     "Ethical Standards",

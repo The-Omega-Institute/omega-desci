@@ -125,6 +125,7 @@ export default async function ReviewCardPage({ params }: { params: { hash: strin
                     <div key={c.id} className="border border-zinc-800 bg-black/20 p-4">
                       <div className="text-[10px] font-mono text-zinc-600 mb-1">{c.id}</div>
                       <div className="text-sm text-zinc-200">{c.claim}</div>
+                      {c.sourceRef ? <div className="mt-1 text-xs font-mono text-zinc-500">SOURCE_REF: {c.sourceRef}</div> : null}
                       <div className="mt-2 text-xs font-mono text-zinc-600">EVIDENCE_IDS: {(c.evidenceIds || []).length}</div>
                     </div>
                   ))}
@@ -221,4 +222,3 @@ export default async function ReviewCardPage({ params }: { params: { hash: strin
     </div>
   );
 }
-

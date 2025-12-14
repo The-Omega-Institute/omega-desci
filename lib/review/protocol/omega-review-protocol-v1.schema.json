@@ -44,6 +44,7 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "claim": { "type": "string", "minLength": 1 },
+        "sourceRef": { "type": "string" },
         "evidenceIds": { "type": "array", "items": { "type": "string" } }
       }
     },
@@ -123,4 +124,3 @@
     }
   }
 }
-

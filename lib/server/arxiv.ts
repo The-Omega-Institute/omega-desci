@@ -153,7 +153,7 @@ export function arxivRecordToPaper(record: ArxivRecord): Paper {
     doi,
     collectionVolume: record.primaryCategory ? `arXiv · ${record.primaryCategory}` : "arXiv",
     level: 0,
-    articleType: "Preprint",
+    articleType: "Theory Preprint",
     discipline: mapDiscipline(record.primaryCategory),
     keywords,
     authors: (record.authors || []).slice(0, 24).map((name) => ({ name, isAI: false })),
