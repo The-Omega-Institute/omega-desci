@@ -97,6 +97,7 @@
   - Dispute Arbitration and Corrections
   - External Review Import and Attribution
 - Profile: `GET /profile` — demo reputation page: contribution graph + badges (Proof Checker / Replication Engineer / Literature Curator / …), aggregated from local stores (Plan §10.1).
+- Playbook: `GET /play` — consolidated “what we built / what we ship next” list (all current modules + Stage A/B/C roadmap), backed by `lib/playbook.ts`.
 
 ### Data Sources (No DB, Mock-Friendly)
 - Zenodo community ingestion (server fetch → UI): `GET /api/zenodo/records` and `GET /api/zenodo/record/:id` (default community: `the-matrix`).

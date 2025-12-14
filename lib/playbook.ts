@@ -1,0 +1,274 @@
+export type PlaybookStatus = "live" | "demo" | "planned";
+
+export type PlaybookArea = "Explore" | "Review" | "Verify" | "Govern" | "Identity";
+
+export type PlaybookRuntime = "both" | "next_only";
+
+export type PlaybookItem = {
+  id: string;
+  area: PlaybookArea;
+  status: PlaybookStatus;
+  runtime: PlaybookRuntime;
+  href?: string;
+  titleEn: string;
+  titleZh: string;
+  summaryEn: string;
+  summaryZh: string;
+  notesEn?: string;
+  notesZh?: string;
+  tags?: string[];
+};
+
+export const PLAYBOOK_NOW: PlaybookItem[] = [
+  {
+    id: "archive",
+    area: "Explore",
+    status: "live",
+    runtime: "both",
+    href: "/",
+    titleEn: "Archive explorer (Zenodo-backed)",
+    titleZh: "Archive 浏览器（Zenodo 导入）",
+    summaryEn: "Browse the community library with filters, a deep-linked drawer, and evidence-centric paper metadata.",
+    summaryZh: "用筛选 + 详情抽屉 + 深链接浏览论文库，并围绕证据字段组织展示。",
+    notesEn: "On GitHub Pages (static), the archive runs on mock data; Zenodo sync requires the Next.js server runtime.",
+    notesZh: "在 GitHub Pages（静态）上会使用 mock 数据；拉取 Zenodo 需要 Next.js 服务端运行时。",
+    tags: ["zenodo", "drawer", "filters"],
+  },
+  {
+    id: "map",
+    area: "Explore",
+    status: "live",
+    runtime: "both",
+    href: "/map",
+    titleEn: "Keyword co-occurrence map",
+    titleZh: "关键词共现图（Map）",
+    summaryEn: "Explore papers ↔ keywords as a navigable graph with hover highlighting, search, and deep links.",
+    summaryZh: "把论文 ↔ 关键词构成可漫游图谱：悬停高亮、搜索、回跳 archive 深链接。",
+    notesEn: "Client-only graph; it works without a DB. Static mode uses mock data if APIs are unavailable.",
+    notesZh: "纯前端构图，不依赖数据库；静态模式下 API 不可用时自动用 mock 数据。",
+    tags: ["d3", "graph", "discovery"],
+  },
+  {
+    id: "submit",
+    area: "Review",
+    status: "live",
+    runtime: "both",
+    href: "/submit",
+    titleEn: "Submission portal (claims → evidence pointers)",
+    titleZh: "投稿入口（主张 → 证据指针）",
+    summaryEn: "A structured submission form: claims list, assumption ledger, falsifiability path, and provenance/tooling statement.",
+    summaryZh: "结构化投稿表单：主张清单、假设清单、可证伪路径、来源与工具披露。",
+    notesEn: "Saves drafts to localStorage (demo).",
+    notesZh: "Demo 版本用 localStorage 保存草稿。",
+    tags: ["schema", "claims", "provenance"],
+  },
+  {
+    id: "drawer-review",
+    area: "Review",
+    status: "live",
+    runtime: "both",
+    href: "/?paper=zenodo-9928112",
+    titleEn: "Paper drawer: structured comments + open reviews",
+    titleZh: "论文抽屉：讨论 + 结构化评审",
+    summaryEn: "Two channels: typed Comments for conversation, and structured Reviews for citeable assessment and Level upgrades.",
+    summaryZh: "双通道：Comments 用于讨论澄清；Reviews 用于结构化、可引用的审查记录与 Level 升级。",
+    notesEn: "Link opens a paper drawer if that id exists; otherwise open any paper from the archive and click it.",
+    notesZh: "链接会尝试打开指定 paperId 的抽屉；若不存在，请在首页打开任意论文。",
+    tags: ["open-review", "moderation", "levels"],
+  },
+  {
+    id: "ai-audit",
+    area: "Review",
+    status: "live",
+    runtime: "both",
+    href: "/?paper=zenodo-9928112",
+    titleEn: "AI audit line (risk signals, not verdicts)",
+    titleZh: "AI 审计线（风险信号，不是裁决）",
+    summaryEn: "Seven-module audit report: completeness, claim traceability, assumptions, citations, symbol heuristics, reproducibility readiness, abuse signals.",
+    summaryZh: "7 模块审计报告：结构完整性、主张可追溯、假设一致性、引用/DOI、符号启发式、可复现就绪、滥用信号。",
+    notesEn: "Runs client-side heuristics and demo checks; it never auto-upgrades Levels.",
+    notesZh: "以启发式与 demo 检查为主；不会自动触发 Level 升级。",
+    tags: ["audit", "rubric", "risk"],
+  },
+  {
+    id: "arxiv-card",
+    area: "Review",
+    status: "live",
+    runtime: "next_only",
+    href: "/arxiv",
+    titleEn: "Review card generator (arXiv/Zenodo)",
+    titleZh: "评审卡片生成器（arXiv/Zenodo）",
+    summaryEn: "Paste a link → generate a hash-addressed artifact + shareable card + embed HTML.",
+    summaryZh: "粘贴链接 → 生成带哈希的 artifact + 可分享卡片 + iframe 嵌入代码。",
+    notesEn: "Requires the Next.js server runtime (API routes + artifact store).",
+    notesZh: "需要 Next.js 服务端运行时（API 路由 + artifact 存储）。",
+    tags: ["artifact", "embed", "protocol"],
+  },
+  {
+    id: "market",
+    area: "Verify",
+    status: "live",
+    runtime: "next_only",
+    href: "/market",
+    titleEn: "Bounty marketplace (replication tickets)",
+    titleZh: "赏金市场（复现工单）",
+    summaryEn: "Claim/submit/audit reproduction tickets; demo economy with stake + reward + audit confirmation.",
+    summaryZh: "领取/提交/审计复现工单；demo 经济：质押 + 奖励 + 二次审计确认。",
+    notesEn: "Requires the Next.js server runtime (market store API).",
+    notesZh: "需要 Next.js 服务端运行时（market store API）。",
+    tags: ["bounty", "audit", "verification"],
+  },
+  {
+    id: "policies",
+    area: "Govern",
+    status: "live",
+    runtime: "both",
+    href: "/policies",
+    titleEn: "Policies (8 core documents)",
+    titleZh: "政策页（8 份核心政策）",
+    summaryEn: "Scope, provenance/tooling, open review norms, AI audit protocol, data/code availability, ethics/COI, disputes/corrections, external review import.",
+    summaryZh: "范围/文章类型、来源与工具披露、公开评审规范、AI 审计协议、数据与代码可用性、伦理与 COI、争议与纠错、外部审稿导入。",
+    tags: ["governance", "policy", "scope"],
+  },
+  {
+    id: "profile",
+    area: "Identity",
+    status: "live",
+    runtime: "both",
+    href: "/profile",
+    titleEn: "Profile (reputation + badges)",
+    titleZh: "个人页（声望 + 徽章）",
+    summaryEn: "A demo reputation view aggregating contribution signals from local stores (reviews, validation, curation).",
+    summaryZh: "Demo 声望页：把评审、验证、策展等贡献信号聚合展示。",
+    tags: ["reputation", "badges", "identity"],
+  },
+];
+
+export const PLAYBOOK_NEXT: Array<{
+  stageId: "A" | "B" | "C";
+  titleEn: string;
+  titleZh: string;
+  items: PlaybookItem[];
+}> = [
+  {
+    stageId: "A",
+    titleEn: "Stage A (ship immediately)",
+    titleZh: "Stage A（上线就能做）",
+    items: [
+      {
+        id: "real-backend",
+        area: "Govern",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "Real backend (DB + search + ingestion)",
+        titleZh: "真实后端（数据库 + 搜索 + 同步摄取）",
+        summaryEn: "Replace local-only stores with a real database, full-text search, and scheduled Zenodo ingestion/caching.",
+        summaryZh: "把本地存储替换为真实数据库 + 全文搜索，并做 Zenodo 定时同步与缓存。",
+      },
+      {
+        id: "collections",
+        area: "Explore",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "Collections (curated reading maps)",
+        titleZh: "Collections（策展阅读地图）",
+        summaryEn: "Turn 200+ papers from a pile into navigable curricula, controversy maps, and reading paths.",
+        summaryZh: "把 200+ 论文从堆料变成课程式阅读路径、争议点对照表与可导航图谱。",
+      },
+      {
+        id: "claim-mapper",
+        area: "Review",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "Claim mapper (C1…Cn everywhere)",
+        titleZh: "主张映射（C1…Cn 到处可绑定）",
+        summaryEn: "Bind comments/reviews/bounties directly to claim ids + paragraph anchors so disputes converge.",
+        summaryZh: "让评论/评审/赏金直接绑定主张编号与段落锚点，让争论能收敛。",
+      },
+      {
+        id: "external-review-import",
+        area: "Review",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "External review import (attribution + moderation)",
+        titleZh: "外部审稿导入（归因 + 审核）",
+        summaryEn: "Import external AI/human reviews as citeable artifacts with provenance, credit roles, withdrawal, and anti-spam rules.",
+        summaryZh: "把外部 AI/人工审稿作为可引用对象导入：来源、credit 角色、撤回、反刷机制。",
+      },
+    ],
+  },
+  {
+    stageId: "B",
+    titleEn: "Stage B (verification engine)",
+    titleZh: "Stage B（验证引擎）",
+    items: [
+      {
+        id: "formal-track",
+        area: "Verify",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "Formal verification track (Lean/Coq)",
+        titleZh: "形式化验证轨道（Lean/Coq）",
+        summaryEn: "Upload formalization files + CI checks; passing artifacts become Level 3 evidence objects.",
+        summaryZh: "上传形式化文件 + CI 检查；通过后生成 Level 3 的证据对象。",
+      },
+      {
+        id: "counterexample-bounties",
+        area: "Verify",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "Counterexample bounty board",
+        titleZh: "反例赏金板",
+        summaryEn: "Turn disputed claims into bounty tickets optimized for falsification and convergence.",
+        summaryZh: "把争议主张变成面向“可证伪/可收敛”的反例工单与悬赏。",
+      },
+      {
+        id: "repro-sandbox",
+        area: "Verify",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "Reproducible simulation sandbox",
+        titleZh: "可复现实验沙箱",
+        summaryEn: "Standardize params/seeds/envs; validators run reproducibility jobs in an isolated sandbox and publish logs.",
+        summaryZh: "标准化参数/seed/环境；验证者在隔离沙箱中跑复现实验并发布日志。",
+      },
+    ],
+  },
+  {
+    stageId: "C",
+    titleEn: "Stage C (funding + attestations, without losing rigor)",
+    titleZh: "Stage C（资助 + 存证，但不牺牲学术严肃性）",
+    items: [
+      {
+        id: "grants",
+        area: "Govern",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "Grants + bounty governance",
+        titleZh: "资助与赏金治理",
+        summaryEn: "Public proposal → review → payout logs; rewards verification labor, not positions.",
+        summaryZh: "公开提案 → 评审 → 拨款记录；奖励验证劳动，而不是立场站队。",
+      },
+      {
+        id: "onchain-attestation",
+        area: "Govern",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "On-chain attestation (hash only)",
+        titleZh: "链上存证（只存哈希指纹）",
+        summaryEn: "Stamp version hashes and acceptance results on-chain without storing full content.",
+        summaryZh: "对版本哈希与验收结果做链上签名存证，不上链全文内容。",
+      },
+      {
+        id: "community-juries",
+        area: "Govern",
+        status: "planned",
+        runtime: "next_only",
+        titleEn: "Community juries (dispute arbitration)",
+        titleZh: "社区仲裁团（争议裁决）",
+        summaryEn: "Sample high-reputation juries for contested cases; publish votes and reasons.",
+        summaryZh: "从高声望用户池抽样仲裁；公开投票过程与理由。",
+      },
+    ],
+  },
+];

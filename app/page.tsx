@@ -38,6 +38,14 @@ const PAGE_SIZE = 24;
 
 const POSITIONING_CARDS = [
   {
+    tag: "PLAYBOOK",
+    titleEn: "Playbook: what's playable",
+    titleZh: "玩法总览：现在能玩什么",
+    bodyEn: "A single page that consolidates everything we built in the demo, plus the staged roadmap (Stage A/B/C).",
+    bodyZh: "一页整合 Demo 已完成的所有模块，并列出 Stage A/B/C 的未来路线图。",
+    cta: { href: "/play", label: "Open /play" },
+  },
+  {
     tag: "PROTOCOL",
     titleEn: "Claims → Evidence Alignment",
     titleZh: "主张 → 证据对齐",

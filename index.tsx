@@ -10,6 +10,7 @@ import ArxivReviewPage from "./app/arxiv/page";
 import MarketPage from "./app/market/page";
 import KeywordMapPage from "./app/map/page";
 import ProfilePage from "./app/profile/page";
+import PlaybookPage from "./app/play/page";
 import { usePathname } from "./lib/mocks/navigation";
 
 const App = () => {
@@ -33,6 +34,8 @@ const App = () => {
     Component = KeywordMapPage;
   } else if (pathname === "/profile") {
     Component = ProfilePage;
+  } else if (pathname === "/play") {
+    Component = PlaybookPage;
   } else if (pathname.startsWith("/card/")) {
     Component = () => (
       <div className="container py-16">

@@ -983,6 +983,11 @@ Omega 不要求评审写长文，而是要求输出**结构化、可验证**的�
 - **EN:** The `/map` page renders a keyword co-occurrence graph (papers ↔ keywords) fully in the browser for fast exploration.
 - **中文：** `/map` 提供纯前端的关键词共现图（论文↔关键词），让论文库秒变可漫游的探索地图。
 
+### Playbook / 玩法总览
+
+- **EN:** The `/play` page consolidates everything you can try in the current demo UI (including `/map`) and the staged roadmap (Stage A/B/C).
+- **中文：** `/play` 一页整合 Demo 现在能玩的所有模块（包括 `/map`），并列出 Stage A/B/C 的未来路线图。
+
 ## Run locally
 
 **Prerequisites:** Node.js 18+
